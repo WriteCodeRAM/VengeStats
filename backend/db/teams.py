@@ -24,7 +24,7 @@ teams = {
     "NOK": 19, # wtf is NOK basketball reference???  (CP3)
     "NYK": 20, 
     "OKC": 21, 
-    "SEA": 21, # SEATTLE SUPERSONICS NAHHHH JEFF GREEN OLD ASS JUST BROKE MY SCRIPT
+    "SEA": 21, # SEATTLE SUPERSONICS NAHHHH JEFF GREEN JUST BROKE MY SCRIPT
     "ORL": 22, 
     "PHI": 23, 
     "PHO": 24, 
@@ -36,4 +36,3 @@ teams = {
     "WAS": 30  
 }
 
-__all__ = ['teams']

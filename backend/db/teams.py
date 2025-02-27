@@ -11,6 +11,7 @@ teams = {
     "DEN": 8,  
     "DET": 9,  
     "GSW": 10, 
+    "GS": 10,
     "HOU": 11, 
     "IND": 12, 
     "LAC": 13, 
@@ -22,15 +23,18 @@ teams = {
     "NOP": 19, 
     "NOH": 19, #NEW ORLEANS HORNETS 
     "NOK": 19, # wtf is NOK basketball reference???  (CP3)
+    "NO": 19,
     "NYK": 20, 
     "OKC": 21, 
     "SEA": 21, # SEATTLE SUPERSONICS NAHHHH JEFF GREEN JUST BROKE MY SCRIPT
     "ORL": 22, 
     "PHI": 23, 
-    "PHO": 24, 
+    "PHO": 24,
+    "PHX": 24,  
     "POR": 25, 
     "SAC": 26, 
     "SAS": 27, 
+    "SA": 27, 
     "TOR": 28, 
     "UTA": 29, 
     "WAS": 30  

@@ -71,6 +71,6 @@ def get_revenge_games(schedule):
         players = cursor.fetchall()  
 
         for player in players:
-            revenge_games.append(f"{player[1]} {player[2]} is facing his former team {player[4]} today!") 
+            revenge_games.append([f"{player[1]} {player[2]}", player[4], None]) 
 
     return revenge_games

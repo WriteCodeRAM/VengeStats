@@ -6,11 +6,19 @@ from selenium.webdriver.support import expected_conditions as EC
 from backend.bot.config import USERNAME, PASSWORD
 import time
 
-TWEET_TEXT = "selenium test tweet #2"
+# driver = webdriver.Chrome()
 
-driver = webdriver.Chrome()
+def format_revenge_tweet(player_info):
+    """Formats the revenge game tweet based on injury status."""
+    player, former_team, status = player_info
 
-def login_to_twitter():
+    if status:
+        return f"{player} is facing his former team {former_team} today! (Status: {status})"
+    
+    return f"{player} is facing his former team {former_team} today!"
+
+
+def login_to_twitter(driver):
     """Logs into Twitter and handles popups if any appear."""
     driver.get("https://twitter.com/login")
     time.sleep(3)
@@ -35,7 +43,7 @@ def login_to_twitter():
     except:
         print("✅ No popups detected, continuing.")
 
-def post_tweet(tweet: str):
+def post_tweet(driver,tweet: str):
     """Posts a tweet after ensuring elements are loaded."""
     try:
         # wait for the tweet box to appear
@@ -53,11 +61,3 @@ def post_tweet(tweet: str):
 
     except Exception as e:
         print(f"❌ Error posting tweet: {e}")
-
-
-if __name__ == "__main__":
-    try:
-        login_to_twitter() 
-        post_tweet(TWEET_TEXT) 
-    finally:
-        driver.quit()  # close browser

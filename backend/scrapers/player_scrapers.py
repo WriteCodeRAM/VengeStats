@@ -13,7 +13,6 @@ headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
 
-
 # pass in team abbreviation 
 # (MIA instead of Miami)
 def get_player_urls(team: str) -> list[str]: 
@@ -55,7 +54,6 @@ def get_player_history(player_url: str):
     # stops breaking when encounter foreign names with accents (Porzingis, Nurkić)
     player_name = html.unescape(player_name) 
     player_name = unicodedata.normalize("NFKC", player_name)  # Normalize Unicode
-
 
     # LARRY NANCE JR. just broke me
     name_parts = player_name.split(" ")

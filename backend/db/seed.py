@@ -2,8 +2,6 @@ from backend.db.database import get_connection, get_player_id, insert_player_tea
 from backend.db.teams import teams
 from backend.scrapers.player_scrapers import get_player_urls, get_player_history
 
-
-
 def seed(): 
     player_urls = get_player_urls("WAS")
 

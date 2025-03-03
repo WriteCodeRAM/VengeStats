@@ -6,17 +6,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from backend.bot.config import USERNAME, PASSWORD
 import time
 
-# driver = webdriver.Chrome()
-
 def format_revenge_tweet(player_info):
-    """Formats the revenge game tweet based on injury status."""
     player, former_team, status = player_info
 
     if status:
-        return f"{player} is facing his former team {former_team} today! (Status: {status})"
+        return f"{player} is facing his former team the {former_team} today. (Status: {status})"
     
-    return f"{player} is facing his former team {former_team} today!"
-
+    return f"{player} is facing his former team the {former_team} today."
 
 def login_to_twitter(driver):
     """Logs into Twitter and handles popups if any appear."""

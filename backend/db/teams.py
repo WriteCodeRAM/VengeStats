@@ -25,6 +25,7 @@ teams = {
     "NOK": 19, # wtf is NOK basketball reference???  (CP3)
     "NO": 19,
     "NYK": 20, 
+    "NY": 20,
     "OKC": 21, 
     "SEA": 21, # SEATTLE SUPERSONICS NAHHHH JEFF GREEN JUST BROKE MY SCRIPT
     "ORL": 22, 
@@ -37,6 +38,7 @@ teams = {
     "SA": 27, 
     "TOR": 28, 
     "UTA": 29, 
+    "UTAH":29,
     "WAS": 30  
 }
 

@@ -13,7 +13,7 @@ SELECT DISTINCT
     curr_team.name AS current_team_name,  
     former_team.name AS former_team_name  
 FROM players p
-JOIN player_team_history pth ON p.id = pth.player_id
+JOIN nba_player_team_history pth ON p.id = pth.player_id
 JOIN teams curr_team ON p.current_team_id = curr_team.id  -- Get current team
 JOIN teams former_team ON pth.team_id = former_team.id  -- Get former team
 WHERE 
@@ -47,15 +47,35 @@ def get_player_id(first_name: str, last_name: str) -> int:
     conn.close()
     return result[0] if result else None
 
-def insert_player_team_history(player_id: int, team_id: int):
+def get_current_nba_roster(team_id: int):
+    """Returns a set of players currently on an NBA team's roster from the database."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    query = sql.SQL("SELECT first_name, last_name FROM nba_players WHERE current_team_id = %s")
+    cursor.execute(query, (team_id,)) 
+
+    res = cursor.fetchall() 
+    
+    # convert to a set of full names for easy comparison
+    current_roster = {f"{row[0]} {row[1]}" for row in res}
+
+    cursor.close()
+    conn.close()
+
+    return current_roster
+
+
+def insert_player_team_history(player_id: int, team_id: int, games_played: int):
     conn = get_connection()
     cursor = conn.cursor()
     insert_query = sql.SQL("""
-        INSERT INTO player_team_history (player_id, team_id)
-        VALUES (%s, %s)
-        ON CONFLICT (player_id, team_id) DO NOTHING
+        INSERT INTO nba_player_team_history (player_id, team_id, games_played)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (player_id, team_id) DO UPDATE 
+        SET games_played = EXCLUDED.games_played
     """)
-    cursor.execute(insert_query, (player_id, team_id))
+    cursor.execute(insert_query, (player_id, team_id, games_played))
     conn.commit()
     cursor.close()
     conn.close()

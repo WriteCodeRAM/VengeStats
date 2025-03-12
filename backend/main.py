@@ -5,20 +5,20 @@ from backend.scrapers.injury_scrapers import get_nba_injuries
 from selenium import webdriver
 
 def run():
-
     # get todays schedule and potential revenge games
     daily_schedule = get_nba_schedule()  
+    print(daily_schedule)
     team_id_list = get_team_ids(daily_schedule)  
+    print(team_id_list)
     revenge_games = get_revenge_games(team_id_list)
 
-    # injury updates
+    # injury updates, if player is out dont tweet
     updated_revenge_games = get_nba_injuries(revenge_games)
+    print(updated_revenge_games)
     revenge_games_to_tweet = [game for game in updated_revenge_games if game[2] != "Out"]
-    # print(revenge_games_to_tweet)
 
-    # make bot post tweets
-    # use scheduler, (11am may be too early, didnt work today..)
-    #started working at 11:09 hmmm
+    
+#    make bot post tweets
     try:
         driver = webdriver.Chrome() 
         login_to_twitter(driver)  
@@ -26,7 +26,6 @@ def run():
         for game in revenge_games_to_tweet:
             tweet = format_revenge_tweet(game)
             post_tweet(driver, tweet) 
-
     finally:
         driver.quit() # close browser 
 

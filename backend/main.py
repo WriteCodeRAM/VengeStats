@@ -7,14 +7,18 @@ from selenium import webdriver
 def run():
     # get todays schedule and potential revenge games
     daily_schedule = get_nba_schedule()  
+    print(daily_schedule)
     team_id_list = get_team_ids(daily_schedule)  
-    revenge_games = get_revenge_games(schedule)
+    print(team_id_list)
+    revenge_games = get_revenge_games(team_id_list)
 
     # injury updates, if player is out dont tweet
     updated_revenge_games = get_nba_injuries(revenge_games)
+    print(updated_revenge_games)
     revenge_games_to_tweet = [game for game in updated_revenge_games if game[2] != "Out"]
+
     
-    # make bot post tweets
+#    make bot post tweets
     try:
         driver = webdriver.Chrome() 
         login_to_twitter(driver)  

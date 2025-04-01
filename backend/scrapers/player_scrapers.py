@@ -36,7 +36,7 @@ def get_player_urls(team: str) -> list[str]:
     return player_urls
 
 def get_player_history(player_url: str):
-    history = []  # ✅ Maintain order, but prevent consecutive duplicates
+    history = [] 
     games_played = {}  
 
     url = f"{base_url}{player_url}"
@@ -49,12 +49,12 @@ def get_player_history(player_url: str):
     # Find the correct table
     table = soup.find('table', {'id': 'per_game_stats'})
     if not table:
-        # Check if this is a rate limit or a new player
+        # Check if this is a rate limit
         if page.status_code == 429 or "Too Many Requests" in page.text:
             print(f"❌ RATE LIMITED: {url}")
             return ("RATE_LIMITED", None, None)
 
-    # ✅ Get & properly format player name
+    # Get & properly format player name
     player_name = soup.find('h1').text.strip()
     player_name = html.unescape(player_name)  # ✅ Convert HTML entities (fix "Ä" issue)
     player_name = unicodedata.normalize("NFKC", player_name)  # ✅ Normalize Unicode
@@ -66,7 +66,7 @@ def get_player_history(player_url: str):
     if not table: 
         return ("NEW_PLAYER", first_name, last_name)
 
-    # ✅ Extract team history (AVOID consecutive duplicates)
+    # extract team history (AVOID consecutive duplicates)
     team_cells = table.find_all('td', {'data-stat': 'team_name_abbr'})
     last_team = None  
 
@@ -78,7 +78,7 @@ def get_player_history(player_url: str):
                 history.append(team_abbr)
                 last_team = team_abbr
 
-    # ✅ Extract games played from `tfoot`
+    # extract games played from `tfoot`
     tfoot = table.find('tfoot')
     if tfoot:
         rows = tfoot.find_all('tr')
@@ -95,13 +95,10 @@ def get_player_history(player_url: str):
                 games = int(games_cell.text.strip()) if games_cell.text.strip().isdigit() else 0
                 games_played[team_abbr] = games  
 
-    # ✅ Convert history back to a set for the existing logic
     history_set = set(history)
-
-    # ✅ Get prev_team_id from history
+    # Get prev_team_id from history
     prev_team_id = teams[history[-2]] if len(history) > 1 else None
 
     return (first_name, last_name, history_set, games_played, prev_team_id)
-
 
 # print(get_player_history("/players/y/youngtr01.html"))

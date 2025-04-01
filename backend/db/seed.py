@@ -3,7 +3,8 @@ from backend.db.teams import teams
 from backend.scrapers.player_scrapers import get_player_urls, get_player_history
 
 def seed():
-    team = "CLE"
+    # pass in team abbrev as TEAM, (must be the abbrev bballref uses)
+    team = "CHO"
     team_id = teams[team]
     limited = False
 
@@ -12,7 +13,7 @@ def seed():
     player_urls = get_player_urls(team)
 
     for player in player_urls: 
-        # ✅ Step 3: Scrape player history & retrieve name
+        # scrape player history & retrieve name
         result = get_player_history(player)
 
         if result[0] == "NEW_PLAYER":

@@ -27,4 +27,4 @@ revenge_narratives = {
 # can we use this to help weith scoring 
 # lookup player name in db, get id, check first game table, check histories, check for name in revenge narratives / all stars. generate score
 # 
-def calculate_venge_score():  
+# def calculate_venge_score():  

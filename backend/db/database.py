@@ -192,7 +192,6 @@ def check_first_revenge_game(player_id: int, team_id: int) -> bool:
 
     return not exists  # (first-time revenge game)
 
-
 def insert_first_revenge_game(player_id: int, team_id: int):
     """Inserts a first-time revenge game record."""
     conn = get_connection()

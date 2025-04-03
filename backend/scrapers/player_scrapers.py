@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
-from backend.db.database import get_connection
-from backend.db.teams import teams 
+from backend.db.queries.teams import teams 
 import requests
 import html
 import unicodedata

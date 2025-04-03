@@ -1,5 +1,5 @@
 import requests
-from backend.db.teams import teams
+from backend.db.queries.teams import teams
 
 def get_nba_schedule():
     url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"

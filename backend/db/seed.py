@@ -1,10 +1,10 @@
-from backend.db.database import get_connection, get_player_id, insert_player_team_history, get_current_nba_roster, update_prev_team_id, move_player_to_team
-from backend.db.teams import teams
+from backend.db.queries.players import get_player_id, insert_player_team_history, move_player_to_team
+from backend.db.queries.teams import teams, get_current_nba_roster, update_prev_team_id
 from backend.scrapers.player_scrapers import get_player_urls, get_player_history
 
 def seed():
     # pass in team abbrev as TEAM, (must be the abbrev bballref uses)
-    team = "CHO"
+    team = "WAS"
     team_id = teams[team]
     limited = False
 

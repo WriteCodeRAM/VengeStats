@@ -1,7 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
+from backend.types_def import NBARevengeGame
+from typing import List
 
-def get_nba_injuries(revenge_games):
+def get_nba_injuries(revenge_games: List[NBARevengeGame]):
     url = "https://www.espn.com/nba/injuries"
     headers = {"User-Agent": "Mozilla/5.0"}
 
@@ -29,4 +31,4 @@ def get_nba_injuries(revenge_games):
                 if game[0] == player_name:  
                     game[2] = injury_status  
 
-    return revenge_games # updated w/ imjury status 
+    return revenge_games # updated w/ injury status 

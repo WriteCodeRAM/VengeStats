@@ -1,6 +1,6 @@
 from backend.db.database import get_connection
-import psycopg2
-from psycopg2 import sql
+from backend.types_def import NBARevengeGame
+from typing import List, Tuple
 
 REVENGE_GAME_QUERY = """
 SELECT DISTINCT 
@@ -19,8 +19,7 @@ WHERE
     (p.current_team_id = %s AND pth.team_id = %s); -- Player is currently on Team B, used to be on Team A
 """
 
-# gonna pass the list of team ids here 
-def get_revenge_games(schedule):
+def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengeGame]:
     conn = get_connection()
     cursor = conn.cursor()
     

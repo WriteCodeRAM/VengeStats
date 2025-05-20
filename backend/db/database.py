@@ -1,6 +1,5 @@
 import os
 import psycopg2
-from psycopg2 import sql
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,4 +17,3 @@ def get_connection():
     except Exception as e:
         print(f"Database connection failed: {e}")
         return None
-

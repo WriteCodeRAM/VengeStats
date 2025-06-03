@@ -18,52 +18,50 @@ teams = {
     "WAS": 30, "WSH": 30,  
 }
 
-
 def get_current_nba_roster(team_id: int):
     """Returns a set of players currently on an NBA team's roster from the database."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    
-    query = sql.SQL("SELECT first_name, last_name FROM nba_players WHERE current_team_id = %s")
-    cursor.execute(query, (team_id,)) 
-
-    res = cursor.fetchall() 
-    
-    # convert to a set of full names for easy comparison
-    current_roster = {(row[0], row[1]) for row in res}  # ("LeBron", "James")
-
-
-    cursor.close()
-    conn.close()
-
-    return current_roster
+    with get_connection() as conn: 
+        with conn.cursor() as cursor:
+            
+            query = sql.SQL("SELECT first_name, last_name FROM nba_players WHERE current_team_id = %s")
+            cursor.execute(query, (team_id,)) 
+            res = cursor.fetchall() 
+            
+            # convert to a set of full names for easy comparison
+            current_roster = {(row[0], row[1]) for row in res}  # ("LeBron", "James")
+            return current_roster
 
 
 def get_current_team_id(player_id: int) -> int:
     """Retrieve the current team ID of a player from the database."""
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn: 
+        with conn.cursor() as cursor:
     
-    cursor.execute("SELECT current_team_id FROM nba_players WHERE id = %s", (player_id,))
-    result = cursor.fetchone()
+            cursor.execute("SELECT current_team_id FROM nba_players WHERE id = %s", (player_id,))
+            result = cursor.fetchone()
+            
+            return result[0] if result else None
+        
+def get_prev_team_id(player_id: int) -> int:
+    """Retrieve the previous team ID of a player from the database."""
+    with get_connection() as conn: 
+        with conn.cursor() as cursor:
     
-    cursor.close()
-    conn.close()
-
-    return result[0] if result else None
+            cursor.execute("SELECT prev_team_id FROM nba_players WHERE id = %s", (player_id,))
+            result = cursor.fetchone()
+            
+            return result[0] if result else None
 
 def update_prev_team_id(player_id: int, prev_team_id: int):
     """Updates a player's prev_team_id in the database."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    
-    update_query = sql.SQL("""
-        UPDATE nba_players 
-        SET prev_team_id = %s
-        WHERE id = %s
-    """)
-    
-    cursor.execute(update_query, (prev_team_id, player_id))
-    conn.commit()
-    cursor.close()
-    conn.close()
+    with get_connection() as conn: 
+        with conn.cursor() as cursor:
+            
+            update_query = sql.SQL("""
+                UPDATE nba_players 
+                SET prev_team_id = %s
+                WHERE id = %s
+            """)
+            
+            cursor.execute(update_query, (prev_team_id, player_id))
+            conn.commit()

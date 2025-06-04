@@ -33,8 +33,8 @@ def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengeGame]:
                         player[4],                   # Former team name
                         None,                        # Injury status
                         player[0],                   # Player ID
-                        player[5],                    # Opponent team ID
-                        None
+                        player[5],                   # Opponent team ID
+                        None                         # revenge_score placeholder
                     ])
             return revenge_games
 

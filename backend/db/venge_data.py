@@ -74,5 +74,3 @@ def calculate_venge_score(
 
     # Capped at 10
     return round(min(score, 10.0), 1)
-
-print(calculate_venge_score(332, "Jalen Brunson", 7))

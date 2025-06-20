@@ -1,10 +1,11 @@
-from backend.db.queries.players import get_player_id, insert_player_team_history, move_player_to_team
+from backend.db.queries.players import get_player_id, insert_player_team_stint, move_player_to_team
 from backend.db.queries.teams import teams, get_current_nba_roster, update_prev_team_id
 from backend.scrapers.player_scrapers import get_player_urls, get_player_history
+import time
 
 def seed():
     # pass in team abbrev as TEAM, (must be the abbrev bballref uses)
-    team = "WAS"
+    team = "NOP"
     team_id = teams[team]
     limited = False
 
@@ -12,19 +13,17 @@ def seed():
 
     player_urls = get_player_urls(team)
 
-    for player in player_urls: 
-        # scrape player history & retrieve name
-        result = get_player_history(player)
-
-        if result[0] == "NEW_PLAYER":
-            player_id = get_player_id(result[1], result[2], team_id)
-            if (result[1], result[2]) in current_roster:
-                current_roster.remove((result[1], result[2]))
-            continue
-        elif result[0] == "RATE_LIMITED": 
-            limited = True 
-            continue 
+    for i, player_url in enumerate(player_urls):
+        if i > 0 and i % 5 == 0:
+            if i == 15:
+                print(f"Processed {i} players, taking 5 min break...")
+                time.sleep(300)  
+            else:
+                print(f"Processed {i} players, taking 2 min break...")
+                time.sleep(120)  
         
+        result = get_player_history(player_url)
+            
         # if all goes well continue
         first_name, last_name, history, games_played, prev_team_id = result
         player_tuple = (first_name, last_name)
@@ -43,10 +42,10 @@ def seed():
             print(f"🚨 NEW PLAYER DETECTED: Moving {first_name} {last_name} to {team_id}")
             move_player_to_team(player_id, team_id)  
 
-
-        for team_abbrev in history:
-            old_team_id = teams[team_abbrev]
-            insert_player_team_history(player_id, old_team_id, games_played.get(team_abbrev, 0))
+        for team_abbrev, start_date, end_date in history:
+            curr_team_id = teams[team_abbrev]
+            gp = games_played.get(team_abbrev, 0)
+            insert_player_team_stint(player_id, curr_team_id, start_date, end_date, gp)
 
     if not limited:
         for removed_player in current_roster:

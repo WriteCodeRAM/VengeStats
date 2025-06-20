@@ -46,18 +46,19 @@ def get_total_games_played_for_team(player_id: int, team_id: int) -> int:
             total_games = sum(row[0] for row in results)
             return total_games
 
-def insert_player_team_history(player_id: int, team_id: int, games_played: int):
-    with get_connection() as conn: 
-        with conn.cursor() as cursor:
 
-            insert_query = sql.SQL("""
-                INSERT INTO nba_player_team_history (player_id, team_id, games_played)
-                VALUES (%s, %s, %s)
-                ON CONFLICT (player_id, team_id) DO UPDATE 
-                SET games_played = EXCLUDED.games_played
-            """)
-            cursor.execute(insert_query, (player_id, team_id, games_played))
-            conn.commit()
+def insert_player_team_stint(player_id, team_id, start_date, end_date, games_played):
+    with get_connection() as conn:
+        with conn.cursor() as cursor: 
+            cursor.execute(
+                """
+                INSERT INTO nba_player_team_stints (player_id, team_id, first_game_date, last_game_date, games_played)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (player_id, team_id, first_game_date, last_game_date) DO NOTHING
+                """,
+                (player_id, team_id, start_date, end_date, games_played)  # end_date can be None
+            )
+        conn.commit()
 
 def move_player_to_team(player_id: int, new_team_id: int):
     with get_connection() as conn: 

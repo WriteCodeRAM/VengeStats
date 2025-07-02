@@ -5,22 +5,17 @@ import time
 
 def seed():
     # pass in team abbrev as TEAM, (must be the abbrev bballref uses)
-    team = "NOP"
+    team = "WAS"
     team_id = teams[team]
     limited = False
 
     current_roster = get_current_nba_roster(team_id)
-
     player_urls = get_player_urls(team)
 
-    for i, player_url in enumerate(player_urls):
+    for i, player_url in enumerate(player_urls): 
         if i > 0 and i % 5 == 0:
-            if i == 15:
-                print(f"Processed {i} players, taking 5 min break...")
-                time.sleep(300)  
-            else:
-                print(f"Processed {i} players, taking 2 min break...")
-                time.sleep(120)  
+            print(f"Processed {i} players, taking 5 min break...")
+            time.sleep(300)  
         
         result = get_player_history(player_url)
             

@@ -1,6 +1,8 @@
 from backend.db.queries.players import get_total_games_played, get_total_games_played_for_team
 from backend.db.queries.revenge_games import check_first_revenge_game
 from backend.db.queries.teams import get_prev_team_id
+from backend.nba_api.utils.data_fetcher import get_fair_comparison, compare_stats
+
 # All-Star Selections for 2024-2025 Season
 all_stars = {
     "LeBron James", "Jaylen Brown", "Stephen Curry", "Kevin Durant", "James Harden",
@@ -26,11 +28,77 @@ notable_revenge_narratives = {
     "Luka Dončić": [7]                  # DAL
 }
 
+def calculate_revenge_performance_score(player_id: int, opponent_team_abbr: str, since_date: str) -> float:
+    """
+    Calculate performance-based revenge score from 0-2 points
+    
+    Args:
+        player_id: NBA API player ID
+        opponent_team_abbr: Team abbreviation (e.g., 'BOS', 'LAL')
+        since_date: Date when player left the team (YYYY-MM-DD format)
+    
+    Returns:
+        Score from 0-2 based on revenge game performance
+    """
+    try:
+        revenge_games, non_revenge_games = get_fair_comparison(
+            player_id=player_id,
+            former_team=opponent_team_abbr, 
+            after_date=since_date
+        )
+        
+        # Need minimum games for reliable comparison
+        if len(revenge_games) < 2 or len(non_revenge_games) < 5:
+            return 0  # Not enough data
+        
+        comparison = compare_stats(revenge_games, non_revenge_games)
+        
+        if "error" in comparison:
+            return 0
+        
+        diffs = comparison['differences']
+        
+        # Calculate weighted revenge factor
+        revenge_factor = (
+            diffs['points_diff'] * 1.0 +      # Points most important
+            diffs['rebounds_diff'] * 0.5 +    # Rebounds moderate weight
+            diffs['assists_diff'] * 0.7       # Assists important for playmakers
+        )
+        
+        # Convert revenge factor to 0-2 point scale
+        if revenge_factor >= 5:      # Massive revenge boost
+            return 2.0
+        elif revenge_factor >= 3:    # Strong revenge boost  
+            return 1.5
+        elif revenge_factor >= 1:    # Mild revenge boost
+            return 1.0
+        elif revenge_factor >= 0:    # Slight boost or neutral
+            return 0.5
+        else:                        # Actually performs worse
+            return 0.0
+            
+    except Exception as e:
+        print(f"Error calculating revenge performance: {e}")
+        return 0  # Default to no bonus if API fails
+
 def calculate_venge_score(
     player_id: int,
     player_name: str,
     opponent_team_id: int,
+    revenge_games_data=None,
+    non_revenge_games_data=None
 ) -> float:
+    """
+    Calculate comprehensive venge score from 1-10
+    
+    Args:
+        player_id: Internal player ID
+        player_name: Player's full name
+        opponent_team_id: Internal opponent team ID  
+        nba_api_player_id: NBA API player ID (for stats lookup)
+        opponent_team_abbr: Team abbreviation for NBA API
+        departure_date: When player left the team (YYYY-MM-DD)
+    """
     total_games = get_total_games_played(player_id)
     games_with_opponent = get_total_games_played_for_team(player_id, opponent_team_id)
     is_first_time = check_first_revenge_game(player_id, opponent_team_id)
@@ -68,9 +136,78 @@ def calculate_venge_score(
     if player_name in all_stars:
         score += 1
 
-    # 5. The drama and storylines 
+    # 5. NOTABLE REVENGE NARRATIVES (2 points)
     if player_name in notable_revenge_narratives and opponent_team_id in notable_revenge_narratives[player_name]:
         score += 2
 
-    # Capped at 10
-    return round(min(score, 10.0), 1)
+    # 6. PERFORMANCE-BASED REVENGE FACTOR (0-2 points)
+    if revenge_games_data is not None and non_revenge_games_data is not None:
+        # Need minimum games for reliable comparison
+        if len(revenge_games_data) >= 2 and len(non_revenge_games_data) >= 5:
+            comparison = compare_stats(revenge_games_data, non_revenge_games_data)
+            
+            if "error" not in comparison:
+                diffs = comparison['differences']
+                
+                # Calculate weighted revenge factor
+                revenge_factor = (
+                    diffs['points_diff'] * 1.0 +
+                    diffs['rebounds_diff'] * 0.5 +
+                    diffs['assists_diff'] * 0.7
+                )
+                
+                # Convert to 0-2 point scale
+                if revenge_factor >= 5:
+                    performance_score = 2.0
+                elif revenge_factor >= 3:
+                    performance_score = 1.5
+                elif revenge_factor >= 1:
+                    performance_score = 1.0
+                elif revenge_factor >= 0:
+                    performance_score = 0.5
+                else:
+                    performance_score = 0.0
+                
+                score += performance_score
+                print(f"Performance boost: +{performance_score:.1f} points")
+    else: 
+        # recall the api 
+        print("error: need to recall nba_api")
+
+    # Ensure minimum score of 1 and cap at 10
+    final_score = max(1.0, min(score, 10.0))
+    return round(final_score, 1)
+
+def get_venge_score_breakdown(
+    player_id: int,
+    player_name: str, 
+    opponent_team_id: int,
+    nba_api_player_id: int = None,
+    opponent_team_abbr: str = None,
+    departure_date: str = None
+) -> dict:
+    """
+    Get detailed breakdown of venge score components
+    """
+    total_games = get_total_games_played(player_id)
+    games_with_opponent = get_total_games_played_for_team(player_id, opponent_team_id)
+    is_first_time = check_first_revenge_game(player_id, opponent_team_id)
+    
+    breakdown = {
+        "tenure_score": 0,
+        "former_team_bonus": 0,
+        "first_time_bonus": 0,
+        "all_star_bonus": 0,
+        "narrative_bonus": 0,
+        "performance_bonus": 0,
+        "total_score": 0
+    }
+    
+    
+    final_score = calculate_venge_score(
+        player_id, player_name, opponent_team_id,
+        nba_api_player_id, opponent_team_abbr, departure_date
+    )
+    
+    breakdown["total_score"] = final_score
+    return breakdown

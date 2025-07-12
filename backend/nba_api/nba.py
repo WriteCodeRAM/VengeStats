@@ -3,6 +3,7 @@ from backend.nba_api.utils.data_fetcher import get_fair_comparison, compare_stat
 from backend.db.venge_data import calculate_venge_score
 from backend.db.queries.players import get_player_id
 from backend.db.queries.teams import teams
+import time
 
 def test_player_revenge_scoring(player_name: str, former_team_abbr: str, departure_date: str, current_team_abbr: str):
     """
@@ -57,12 +58,14 @@ def test_player_revenge_scoring(player_name: str, former_team_abbr: str, departu
         
         print(f"Revenge games found: {len(revenge_games)}")
         print(f"Non-revenge games found: {len(non_revenge_games)}")
-        
+        wins = 0 
         if len(revenge_games) >= 1:  # Show revenge games even if not enough for comparison
             print(f"\n🎯 REVENGE GAMES vs {former_team_abbr}:")
             for _, game in revenge_games.iterrows():
-                print(f"   {game['Date'].strftime('%Y-%m-%d')}: {game['Matchup']} - {game['Points']}pts, {game['Rebounds']}reb, {game['Assists']}ast")
-        
+                print(f"   {game['Date'].strftime('%Y-%m-%d')}: {game['WL']} {game['Matchup']} - {game['Points']}pts, {game['Rebounds']}reb, {game['Assists']}ast")
+
+                if game['WL'] == 'W': 
+                    wins += 1 
         if len(revenge_games) >= 2 and len(non_revenge_games) >= 5:
             comparison = compare_stats(revenge_games, non_revenge_games)
             
@@ -141,10 +144,16 @@ def test_player_revenge_scoring(player_name: str, former_team_abbr: str, departu
             print("   Level: 📈 MILD REVENGE STORYLINE")
         else:
             print("   Level: 😐 LOW REVENGE FACTOR")
-            
+        
+
+        print(f"W/L: {wins}/{len(revenge_games)}")
+
+        
     except Exception as e:
         print(f"❌ Error calculating venge score: {e}")
         print(f"   This might be due to missing database setup or API issues")
+    
+    
 
 if __name__ == "__main__":
     print("🏀 VENGESTATS REVENGE SCORING TEST")
@@ -156,8 +165,8 @@ if __name__ == "__main__":
         # ("Kyrie Irving", "BOS", "2019-05-08", "DAL"),   # Kyrie vs Celtics
         # ("Luka Dončić", "DAL", "2025-01-30", "LAL"),   # Luka vs Mavs
         # ("Kevin Durant", "GSW", "2019-07-07", "PHO"),   # KD vs Warriors  
-        ("Kevin Durant", "OKC", "2016-05-30", "PHO"),   # KD vs OKC  
-        # ("LeBron James", "MIA", "2014-07-11", "LAL"),   # LeBron vs Heat
+        # ("Kevin Durant", "OKC", "2016-05-30", "PHO"),   # KD vs OKC  
+        ("LeBron James", "CLE", "2010-05-13", "MIA"),   # LeBron vs Heat
         # ("Jimmy Butler", "MIN", "2018-11-12", "GSW"),   # Jimmy vs Wolves
         # ("Jimmy Butler", "CHI", "2017-04-28", "GSW"),   # Jimmy vs MIA
         # ("Paul George", "IND", "2017-07-06", "PHI"),    # PG vs Pacers
@@ -165,6 +174,7 @@ if __name__ == "__main__":
     
     for player_name, former_team_abbr, departure_date, current_team_abbr in test_cases:
         try:
+            time.sleep(5)
             test_player_revenge_scoring(player_name, former_team_abbr, departure_date, current_team_abbr)
         except Exception as e:
             print(f"❌ Error testing {player_name}: {e}")

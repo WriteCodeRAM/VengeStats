@@ -9,15 +9,18 @@ SELECT DISTINCT
     p.last_name, 
     curr_team.name AS current_team_name,  
     former_team.name AS former_team_name,
-    former_team.id AS opponent_team_id
+    former_team.id AS opponent_team_id,
+    MAX(pts.last_game_date) AS most_recent_departure
 FROM nba_players p
 JOIN nba_player_team_history pth ON p.id = pth.player_id
 JOIN teams curr_team ON p.current_team_id = curr_team.id
 JOIN teams former_team ON pth.team_id = former_team.id
+JOIN nba_player_team_stints pts ON p.id = pts.player_id AND former_team.id = pts.team_id
 WHERE 
     (p.current_team_id = %s AND pth.team_id = %s)
     OR 
-    (p.current_team_id = %s AND pth.team_id = %s);
+    (p.current_team_id = %s AND pth.team_id = %s)
+GROUP BY p.id, p.first_name, p.last_name, curr_team.name, former_team.name, former_team.id;
 """
 
 def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengeGame]:
@@ -34,7 +37,8 @@ def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengeGame]:
                         None,                        # Injury status
                         player[0],                   # Player ID
                         player[5],                   # Opponent team ID
-                        None                         # revenge_score placeholder
+                        None,                        # revenge_score placeholder
+                        player[6]                    # departure date (most recent stint)
                     ])
             return revenge_games
 

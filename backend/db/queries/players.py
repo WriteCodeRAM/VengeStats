@@ -46,7 +46,6 @@ def get_total_games_played_for_team(player_id: int, team_id: int) -> int:
             total_games = sum(row[0] for row in results)
             return total_games
 
-
 def insert_player_team_stint(player_id, team_id, start_date, end_date, games_played):
     with get_connection() as conn:
         with conn.cursor() as cursor: 

@@ -46,8 +46,10 @@ def get_stats(player_id, opponent=None, after_date=None):
     df_combined['GAME_DATE'] = pd.to_datetime(df_combined['GAME_DATE'])
     
     # Select relevant columns
-    df_selected = df_combined[['GAME_DATE', 'MATCHUP', 'PTS', 'REB', 'AST', 'MIN']]
-    df_selected.columns = ['Date', 'Matchup', 'Points', 'Rebounds', 'Assists', 'Minutes']
+    print('this is DF COMBINED')
+    print(df_combined)
+    df_selected = df_combined[['WL', 'GAME_DATE', 'MATCHUP', 'PTS', 'REB', 'AST', 'MIN']]
+    df_selected.columns = ['WL', 'Date', 'Matchup', 'Points', 'Rebounds', 'Assists', 'Minutes']
 
     # Filter by date if provided
     if after_date:
@@ -109,16 +111,23 @@ def exclude_former_teams(df, former_teams):
 
 def get_fair_comparison(player_id, former_team, after_date):
     """
-    Get revenge games vs non-revenge games for comparison
-    
-    Returns:
-        tuple: (revenge_games_df, non_revenge_games_df)
+    Get revenge games vs non-revenge games for comparison - OPTIMIZED VERSION
     """
-    # Get revenge games after the date
-    revenge_games = get_stats(player_id, opponent=former_team, after_date=after_date)
-    
-    # Get ALL games after the same date, then exclude revenge games
+    # Fetch ALL games once
     all_games = get_stats(player_id, after_date=after_date)
+    
+    # Filter for revenge games
+    def is_opponent_game(matchup, target_opponent):
+        if ' vs. ' in matchup:
+            player_team, opponent_team = matchup.split(' vs. ')
+            return opponent_team.strip() == target_opponent
+        elif ' @ ' in matchup:
+            player_team, opponent_team = matchup.split(' @ ')
+            return opponent_team.strip() == target_opponent
+        return False
+    
+    # Split the data instead of fetching twice
+    revenge_games = all_games[all_games['Matchup'].apply(lambda x: is_opponent_game(x, former_team))]
     non_revenge_games = exclude_former_teams(all_games, [former_team])
     
     return revenge_games, non_revenge_games

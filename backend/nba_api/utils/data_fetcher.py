@@ -44,10 +44,6 @@ def get_stats(player_id, opponent=None, after_date=None):
     
     # Convert GAME_DATE to datetime
     df_combined['GAME_DATE'] = pd.to_datetime(df_combined['GAME_DATE'])
-    
-    # Select relevant columns
-    print('this is DF COMBINED')
-    print(df_combined)
     df_selected = df_combined[['WL', 'GAME_DATE', 'MATCHUP', 'PTS', 'REB', 'AST', 'MIN']]
     df_selected.columns = ['WL', 'Date', 'Matchup', 'Points', 'Rebounds', 'Assists', 'Minutes']
 
@@ -109,11 +105,12 @@ def exclude_former_teams(df, former_teams):
     return df[df['Matchup'].apply(lambda x: is_not_former_team_game(x, former_teams))]
 
 
-def get_fair_comparison(player_id, former_team, after_date):
+# needs player_id from nba_api
+def get_fair_comparison(player_id: int, former_team: str, after_date: datetime):
     """
-    Get revenge games vs non-revenge games for comparison - OPTIMIZED VERSION
+    Get revenge games vs non-revenge games for comparison
     """
-    # Fetch ALL games once
+    # Fetch ALL games
     all_games = get_stats(player_id, after_date=after_date)
     
     # Filter for revenge games
@@ -126,7 +123,7 @@ def get_fair_comparison(player_id, former_team, after_date):
             return opponent_team.strip() == target_opponent
         return False
     
-    # Split the data instead of fetching twice
+    # Split the data instead of fetching 2x
     revenge_games = all_games[all_games['Matchup'].apply(lambda x: is_opponent_game(x, former_team))]
     non_revenge_games = exclude_former_teams(all_games, [former_team])
     

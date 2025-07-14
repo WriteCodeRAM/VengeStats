@@ -1,7 +1,5 @@
 from backend.db.database import get_connection
-import psycopg2
 from psycopg2 import sql
-
 
 def get_player_id(first_name: str, last_name: str, current_team_id: int) -> int:
     with get_connection() as conn:
@@ -46,6 +44,7 @@ def get_total_games_played_for_team(player_id: int, team_id: int) -> int:
             total_games = sum(row[0] for row in results)
             return total_games
 
+# using bballref scrapes 
 def insert_player_team_stint(player_id, team_id, start_date, end_date, games_played):
     with get_connection() as conn:
         with conn.cursor() as cursor: 
@@ -56,6 +55,28 @@ def insert_player_team_stint(player_id, team_id, start_date, end_date, games_pla
                 ON CONFLICT (player_id, team_id, first_game_date, last_game_date) DO NOTHING
                 """,
                 (player_id, team_id, start_date, end_date, games_played)  # end_date can be None
+            )
+        conn.commit()
+
+# using the nba api
+def insert_api_player_stint(player_id, team_id, start_date, end_date, games_played, nba_api_player_id):
+    """
+    Insert or update player stint - will overwrite existing data on reruns
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cursor: 
+            cursor.execute(
+                """
+                INSERT INTO nba_player_team_stints_api (player_id, team_id, first_game_date, last_game_date, games_played, nba_api_player_id)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (player_id, team_id, first_game_date, last_game_date) 
+                DO UPDATE SET 
+                    last_game_date = EXCLUDED.last_game_date,
+                    games_played = EXCLUDED.games_played,
+                    nba_api_player_id = EXCLUDED.nba_api_player_id,
+                    created_at = CURRENT_TIMESTAMP
+                """,
+                (player_id, team_id, start_date, end_date, games_played, nba_api_player_id)
             )
         conn.commit()
 
@@ -89,4 +110,3 @@ def move_player_to_team(player_id: int, new_team_id: int):
             cursor.execute(update_query, (new_prev_team_id, new_team_id, player_id))
             
             conn.commit()
-

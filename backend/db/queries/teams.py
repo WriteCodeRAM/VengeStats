@@ -26,6 +26,40 @@ team_id_to_abbr = {
     25: "POR", 26: "SAC", 27: "SAS", 28: "TOR", 29: "UTA", 30: "WAS"
 }
 
+# team mapping (1-30) to NBA API IDs
+team_id_to_nba_api_id = {
+    1: 1610612737,   # ATL
+    2: 1610612738,   # BOS
+    3: 1610612751,   # BRK/BKN
+    4: 1610612766,   # CHA
+    5: 1610612741,   # CHI
+    6: 1610612739,   # CLE
+    7: 1610612742,   # DAL
+    8: 1610612743,   # DEN
+    9: 1610612765,   # DET
+    10: 1610612744,  # GSW
+    11: 1610612745,  # HOU
+    12: 1610612754,  # IND
+    13: 1610612746,  # LAC
+    14: 1610612747,  # LAL
+    15: 1610612763,  # MEM
+    16: 1610612748,  # MIA
+    17: 1610612749,  # MIL
+    18: 1610612750,  # MIN
+    19: 1610612740,  # NOP
+    20: 1610612752,  # NYK
+    21: 1610612760,  # OKC
+    22: 1610612753,  # ORL
+    23: 1610612755,  # PHI
+    24: 1610612756,  # PHX
+    25: 1610612757,  # POR
+    26: 1610612758,  # SAC
+    27: 1610612759,  # SAS
+    28: 1610612761,  # TOR
+    29: 1610612762,  # UTA
+    30: 1610612764,  # WAS
+}
+
 def get_current_nba_roster(team_id: int):
     """Returns a set of players currently on an NBA team's roster from the database."""
     with get_connection() as conn: 

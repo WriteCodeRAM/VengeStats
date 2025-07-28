@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from backend.schedule.nba_revenge_pipeline import get_daily_revenge_matchups
 
+
 app = FastAPI()
 
 @app.get("/")

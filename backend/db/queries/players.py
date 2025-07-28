@@ -37,7 +37,7 @@ def get_total_games_played(player_id: int) -> int:
 def get_total_games_played_for_team(player_id: int, team_id: int) -> int:
     with get_connection() as conn: 
         with conn.cursor() as cursor:
-            query = sql.SQL("SELECT games_played FROM nba_player_team_history WHERE player_id = %s and team_id = %s")
+            query = sql.SQL("SELECT games_played FROM nba_player_team_stints_api WHERE player_id = %s and team_id = %s")
             cursor.execute(query, (player_id, team_id))
             results = cursor.fetchall() 
 

@@ -49,6 +49,8 @@ def calculate_venge_score(
     total_games = get_total_games_played(player_id)
     games_with_opponent = get_total_games_played_for_team(player_id, opponent_team_id)
     is_first_time = check_first_revenge_game(player_id, opponent_team_id)
+
+    print(f"{player_name}: total games = {total_games}, games played for opps = {games_with_opponent}")
     
     score = 0
     

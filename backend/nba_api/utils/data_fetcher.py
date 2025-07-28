@@ -43,7 +43,7 @@ def get_stats(player_id, opponent=None, after_date=None):
     df_combined = pd.concat(all_games, ignore_index=True)
     
     # Convert GAME_DATE to datetime
-    df_combined['GAME_DATE'] = pd.to_datetime(df_combined['GAME_DATE'])
+    df_combined['GAME_DATE'] = pd.to_datetime(df_combined['GAME_DATE'], errors='coerce')
     df_selected = df_combined[['WL', 'GAME_DATE', 'MATCHUP', 'PTS', 'REB', 'AST', 'MIN']]
     df_selected.columns = ['WL', 'Date', 'Matchup', 'Points', 'Rebounds', 'Assists', 'Minutes']
 

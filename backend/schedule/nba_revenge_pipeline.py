@@ -12,7 +12,7 @@ import functools
 @functools.lru_cache
 def get_daily_revenge_matchups():
     # revenge_games = get_nba_schedule()
-    revenge_games = get_revenge_games([[24,21]]) 
+    revenge_games = get_revenge_games([[24,21],[14,7], [16,10]]) 
     updated_games = get_nba_injuries(revenge_games)
     
     enriched_games = []
@@ -60,7 +60,3 @@ def get_daily_revenge_matchups():
         enriched_games.append(enriched_player)
     
     return enriched_games
-
-# data = get_daily_revenge_matchups()
-# for item in data: 
-#     print(f"{item['name']}: former team is {item['former_team_name']} ({item['total_games']} GP). Venge Score: {item['venge_score']}")

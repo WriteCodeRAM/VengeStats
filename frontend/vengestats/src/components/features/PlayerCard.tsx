@@ -23,6 +23,28 @@ export function PlayerCard({ player }: PlayerCardProps) {
     return "bg-blue-500";
   };
 
+  // Determine status display
+  const getPlayerStatus = () => {
+    if (
+      !player.injury_status ||
+      player.injury_status.toLowerCase() === "healthy"
+    ) {
+      return {
+        text: "Active",
+        color: "text-green-400",
+        icon: "✓",
+      };
+    } else {
+      return {
+        text: player.injury_status,
+        color: "text-amber-400",
+        icon: "⚠️",
+      };
+    }
+  };
+
+  const status = getPlayerStatus();
+
   return (
     <Card className="bg-dark-card border-borderDefault hover:bg-dark-hover transition-all duration-300 cursor-pointer">
       <CardContent className="p-6">
@@ -34,11 +56,11 @@ export function PlayerCard({ player }: PlayerCardProps) {
           <Badge
             className={`${getVengeScoreBg(player.venge_score)} text-white`}
           >
-            {player.venge_score}/10
+            {player.venge_score}
           </Badge>
         </div>
 
-        {/* Rest stays the same... */}
+        {/* Player Info */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
@@ -56,8 +78,8 @@ export function PlayerCard({ player }: PlayerCardProps) {
           </div>
         </div>
 
-        {/* Stats without the venge score since it's in header now */}
-        <div className="flex gap-6">
+        {/* Stats */}
+        <div className="flex gap-6 mb-4">
           <div className="text-center">
             <div className="text-lg font-bold text-text-primary">
               {player.record}
@@ -72,14 +94,13 @@ export function PlayerCard({ player }: PlayerCardProps) {
           </div>
         </div>
 
-        {/* Injury Status */}
-        {player.injury_status && player.injury_status !== "Healthy" && (
-          <div className="mt-3 pt-3 border-t border-borderDefault">
-            <span className="text-amber-400 text-sm">
-              ⚠️ {player.injury_status}
-            </span>
-          </div>
-        )}
+        {/* Player Status - Always visible now */}
+        <div className="pt-3 border-t border-borderDefault">
+          <span className={`${status.color} text-sm flex items-center gap-1`}>
+            <span>{status.icon}</span>
+            <span>{status.text}</span>
+          </span>
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,4 +1,6 @@
 from backend.db.database import get_connection
+import datetime
+from backend.db.queries.teams import team_id_to_abbr, team_id_to_full_name
 from psycopg2 import sql
 
 def get_player_id(first_name: str, last_name: str, current_team_id: int) -> int:
@@ -43,6 +45,63 @@ def get_total_games_played_for_team(player_id: int, team_id: int) -> int:
 
             total_games = sum(row[0] for row in results)
             return total_games
+
+# returns a list of teams a player has played for 
+# [team id , start year, end year, games played] 
+def get_player_career_history(player_id: int):
+    with get_connection() as conn: 
+        with conn.cursor() as cursor: 
+            query = sql.SQL("SELECT team_id, first_game_date, last_game_date, games_played FROM nba_player_team_stints_api WHERE player_id = %s") 
+            cursor.execute(query, (player_id,))
+            results = cursor.fetchall() 
+
+            if not results:
+                return []
+
+            # Sort by start date (index 1)
+            sorted_results = sorted(results, key=lambda x: x[1])
+            
+            # Merge consecutive intervals for the same team
+            merged = []
+            
+            for team_id, start_date, end_date, games in sorted_results:
+                # If this is the same team as the last entry, merge them
+                if merged and merged[-1][0] == team_id:
+                    # Update the end date to the later one and sum games
+                    prev_team_id, prev_start, prev_end, prev_games = merged[-1]
+                    new_end = end_date if end_date else prev_end
+                    if prev_end and end_date:
+                        new_end = max(prev_end, end_date)
+                    elif end_date:
+                        new_end = end_date
+                    else:
+                        new_end = prev_end
+                    
+                    merged[-1] = (team_id, prev_start, new_end, prev_games + games)
+                else:
+                    # Add new entry
+                    merged.append((team_id, start_date, end_date, games))
+            
+            formatted_career = [] 
+
+            for team_id, start, end, gp in merged: 
+                start_year = start.year
+                end_year = end.year if end else None  # None for current team
+                
+                formatted_career.append({
+                    'team_abbr': team_id_to_abbr[team_id],
+                    'team_full_name': team_id_to_full_name[team_id], 
+                    'start_year': start_year,
+                    'end_year': end_year,
+                    'games_played': gp,
+                    'is_current': end is None
+                })
+
+            return formatted_career
+
+# Test it
+career = get_player_career_history(234)
+print(career)
 
 # using bballref scrapes 
 def insert_player_team_stint(player_id, team_id, start_date, end_date, games_played):
@@ -110,3 +169,7 @@ def move_player_to_team(player_id: int, new_team_id: int):
             cursor.execute(update_query, (new_prev_team_id, new_team_id, player_id))
             
             conn.commit()
+
+
+# sort based on index 1 (start date)
+# merge intervals type thing where we use the later end date if the next idx is the same team as well (for instances like KD (SEA -> OKC)) 

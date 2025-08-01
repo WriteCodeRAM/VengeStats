@@ -4,19 +4,22 @@ from backend.scrapers.injury_scrapers import get_nba_injuries
 from backend.db.venge_data import calculate_venge_score
 from backend.nba_api.utils.data_fetcher import get_fair_comparison
 from backend.nba_api.utils.player_utils import search_player
-from backend.db.queries.teams import team_id_to_abbr
-from backend.db.queries.players import get_total_games_played_for_team
-import time, datetime
-import functools
+from backend.db.queries.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
+from backend.db.queries.players import get_total_games_played_for_team, get_player_career_history
+import time
 
-@functools.lru_cache
 def get_daily_revenge_matchups():
     # revenge_games = get_nba_schedule()
-    revenge_games = get_revenge_games([[24,21],[14,7], [16,10]]) 
+    revenge_games = get_revenge_games([[24,21]]) 
     updated_games = get_nba_injuries(revenge_games)
     
     enriched_games = []
     
+    # player [0] player name
+    # player[1] former team full name
+    # player[2] injury status
+    # player[3] = db player id 
+    # player[4] opponent team id 
     for player in updated_games:
         if player[2] == "Out":  # Skip injured players
             continue
@@ -24,9 +27,13 @@ def get_daily_revenge_matchups():
         time.sleep(5)
         nba_api_id = search_player(player[0])["id"]
         former_team_abbr = team_id_to_abbr[player[4]]
+        former_team_name = team_id_to_full_name[player[4]]
+        current_team_name = team_id_to_full_name[get_current_team_id(player[3])]
         
         revenge_data, nonrevenge_data = get_fair_comparison(nba_api_id, former_team_abbr, player[6])
-        revenge_score = calculate_venge_score(player[3], player[0], player[4], revenge_data, nonrevenge_data)
+        revenge_score, differentials = calculate_venge_score(player[3], player[0], player[4], revenge_data, nonrevenge_data)
+        
+        # print(differentials)
 
         # player[3] = db player id 
         #player[4] opponent team id 
@@ -38,11 +45,16 @@ def get_daily_revenge_matchups():
         
         # Get departure year
         departure_year = player[6].year if player[6] else None
+
+        # get career history 
+        history = get_player_career_history(player[3])
         
         # enriched player data for tweets 
         enriched_player = {
             'name': player[0],
             'former_team_name': player[1],
+            'former_team_abrev': former_team_name,
+            'current_team_name': current_team_name,
             'injury_status': player[2],
             'player_id': player[3],
             'opponent_team_id': player[4],
@@ -54,9 +66,13 @@ def get_daily_revenge_matchups():
             'losses': losses,
             'total_revenge_games': total_revenge_games,
             'record': f"{wins}-{losses}",
-            'former_team_abbr': former_team_abbr
+            'former_team_abbr': former_team_abbr,
+            'differentials': differentials, 
+            'history': history
         }
         
         enriched_games.append(enriched_player)
     
     return enriched_games
+
+# print(get_daily_revenge_matchups())

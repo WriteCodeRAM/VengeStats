@@ -94,7 +94,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
           </div>
         </div>
 
-        {/* Player Status - Always visible now */}
+        {/* Player Status */}
         <div className="pt-3 border-t border-borderDefault">
           <span className={`${status.color} text-sm flex items-center gap-1`}>
             <span>{status.icon}</span>

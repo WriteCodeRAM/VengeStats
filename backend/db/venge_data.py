@@ -28,6 +28,18 @@ notable_revenge_narratives = {
     "Luka Dončić": [7]                  # DAL
 }
 
+def convert_numpy_to_python(obj):
+    """Recursively convert numpy types to Python types"""
+    if hasattr(obj, 'item'):  # numpy scalar
+        return float(obj)
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_to_python(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_to_python(item) for item in obj]
+    else:
+        return obj
+
+
 def calculate_venge_score(
     player_id: int,
     player_name: str,
@@ -49,6 +61,7 @@ def calculate_venge_score(
     total_games = get_total_games_played(player_id)
     games_with_opponent = get_total_games_played_for_team(player_id, opponent_team_id)
     is_first_time = check_first_revenge_game(player_id, opponent_team_id)
+    comparison = None
 
     print(f"{player_name}: total games = {total_games}, games played for opps = {games_with_opponent}")
     
@@ -125,7 +138,8 @@ def calculate_venge_score(
 
     # Ensure minimum score of 1 and cap at 10
     final_score = max(1.0, min(score, 10.0))
-    return round(final_score, 1)
+    # returns score and differentials
+    return [round(final_score, 1), convert_numpy_to_python(comparison)]
 
 def get_venge_score_breakdown(
     player_id: int,

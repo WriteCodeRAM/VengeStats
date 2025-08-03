@@ -10,7 +10,7 @@ import time
 
 def get_daily_revenge_matchups():
     # revenge_games = get_nba_schedule()
-    revenge_games = get_revenge_games([[24,21]]) 
+    revenge_games = get_revenge_games([[24,21], [14,6], [26,2]]) 
     updated_games = get_nba_injuries(revenge_games)
     
     enriched_games = []
@@ -25,10 +25,12 @@ def get_daily_revenge_matchups():
             continue
         
         time.sleep(5)
+        current_team_id = get_current_team_id(player[3])
         nba_api_id = search_player(player[0])["id"]
         former_team_abbr = team_id_to_abbr[player[4]]
         former_team_name = team_id_to_full_name[player[4]]
-        current_team_name = team_id_to_full_name[get_current_team_id(player[3])]
+        current_team_name = team_id_to_full_name[current_team_id]
+        current_team_abrev = team_id_to_abbr[current_team_id]
         
         revenge_data, nonrevenge_data = get_fair_comparison(nba_api_id, former_team_abbr, player[6])
         revenge_score, differentials = calculate_venge_score(player[3], player[0], player[4], revenge_data, nonrevenge_data)
@@ -53,10 +55,12 @@ def get_daily_revenge_matchups():
         enriched_player = {
             'name': player[0],
             'former_team_name': player[1],
-            'former_team_abrev': former_team_name,
+            'former_team_abbr': former_team_name,
             'current_team_name': current_team_name,
+            'current_team_abbr': current_team_abrev,
             'injury_status': player[2],
             'player_id': player[3],
+            'nba_api_id': nba_api_id,
             'opponent_team_id': player[4],
             'venge_score': revenge_score,
             'departure_date': player[6],

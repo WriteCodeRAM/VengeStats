@@ -1,29 +1,35 @@
+"use client";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface PlayerCardProps {
   player: {
     name: string;
-    former_team_name: string;
+    player_id: number;
     former_team_abbr: string;
+    former_team_name: string;
     injury_status: string;
     venge_score: number;
-    departure_date: string;
-    departure_year: number;
     record: string;
     total_revenge_games: number;
-    current_team?: string;
+    current_team_name: string;
+    league: string;
   };
 }
 
 export function PlayerCard({ player }: PlayerCardProps) {
+  const router = useRouter();
+  const handleClick = (e: React.MouseEvent) => {
+    router.push(`/nba/player/${player.player_id}`);
+  };
+
   const getVengeScoreBg = (score: number) => {
     if (score >= 8) return "bg-venge-red";
     if (score >= 6) return "bg-amber-500";
     return "bg-blue-500";
   };
 
-  // Determine status display
   const getPlayerStatus = () => {
     if (
       !player.injury_status ||
@@ -46,12 +52,15 @@ export function PlayerCard({ player }: PlayerCardProps) {
   const status = getPlayerStatus();
 
   return (
-    <Card className="bg-dark-card border-borderDefault hover:bg-dark-hover transition-all duration-300 cursor-pointer">
+    <Card
+      className="bg-dark-card border-borderDefault hover:bg-dark-hover transition-all duration-300 cursor-pointer"
+      onClick={handleClick}
+    >
       <CardContent className="p-6">
         {/* Header with team matchup and venge score */}
         <div className="flex justify-between items-center mb-4">
           <span className="text-white font-semibold">
-            {player.current_team || "TBD"} vs {player.former_team_abbr}
+            {player.current_team_name || "TBD"} vs {player.former_team_abbr}
           </span>
           <Badge
             className={`${getVengeScoreBg(player.venge_score)} text-white`}
@@ -73,7 +82,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
           <div className="flex-1">
             <div className="text-white font-semibold">{player.name}</div>
             <div className="text-text-secondary text-xs">
-              Left {player.former_team_name} in {player.departure_year}
+              Former {player.former_team_name} player
             </div>
           </div>
         </div>

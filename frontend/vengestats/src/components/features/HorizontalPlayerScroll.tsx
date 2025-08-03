@@ -1,23 +1,7 @@
 "use client";
 
 import { PlayerCard } from "./PlayerCard";
-
-interface RevengePlayer {
-  name: string;
-  former_team_name: string;
-  former_team_abbr: string;
-  injury_status: string;
-  venge_score: number;
-  departure_date: string;
-  departure_year: number;
-  record: string;
-  total_revenge_games: number;
-  player_id: number;
-  opponent_team_id: number;
-  total_games: number;
-  wins: number;
-  losses: number;
-}
+import { RevengePlayer } from "@/types/player";
 
 interface HorizontalPlayerScrollProps {
   title: string;
@@ -58,29 +42,26 @@ export function HorizontalPlayerScroll({
       <div className="relative">
         <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
           {players.map((player) => (
-            <div
-              key={`${player.player_id}-${player.opponent_team_id}`}
-              className="flex-shrink-0 w-80"
-            >
+            <div key={`${player.player_id}`} className="flex-shrink-0 w-80">
+              {console.log("HorizontalPlayerScroll passing player:", player)}
               <PlayerCard
                 player={{
                   name: player.name,
                   former_team_name: player.former_team_name,
                   former_team_abbr: player.former_team_abbr,
+                  player_id: player.player_id,
+                  nba_api_id: player.nba_api_id,
                   injury_status: player.injury_status,
                   venge_score: player.venge_score,
-                  departure_date: player.departure_date,
-                  departure_year: player.departure_year,
                   record: player.record,
                   total_revenge_games: player.total_revenge_games,
-                  current_team: "TBD",
+                  current_team_name: player.current_team_name,
                 }}
               />
             </div>
           ))}
         </div>
 
-        {/* Fade effect on right edge */}
         <div className="absolute top-0 right-0 h-full w-12 bg-gradient-to-l from-dark-bg to-transparent pointer-events-none" />
       </div>
     </div>

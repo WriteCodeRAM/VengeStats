@@ -2,23 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { HorizontalPlayerScroll } from "./HorizontalPlayerScroll";
-
-interface RevengePlayer {
-  name: string;
-  former_team_name: string;
-  former_team_abbr: string;
-  injury_status: string;
-  venge_score: number;
-  departure_date: string;
-  departure_year: number;
-  record: string;
-  total_revenge_games: number;
-  player_id: number;
-  opponent_team_id: number;
-  total_games: number;
-  wins: number;
-  losses: number;
-}
+import { RevengePlayer } from "@/types/player";
 
 export function RevengePlayersList() {
   const [nbaPlayers, setNbaPlayers] = useState<RevengePlayer[]>([]);
@@ -77,16 +61,16 @@ export function RevengePlayersList() {
     <div className="space-y-12">
       {/* NBA Section */}
       <HorizontalPlayerScroll
-        title="NBA Revenge Games"
+        title="NBA Revenge Games 🏀"
         subtitle={`${nbaPlayers.length} players seeking vengeance today`}
         players={nbaPlayers}
       />
 
-      {/* NFL Section - Coming Soon */}
+      {/* NFL Section */}
       <HorizontalPlayerScroll
-        title="NFL Revenge Games"
+        title="NFL Revenge Games 🏈"
         subtitle="Coming soon..."
-        players={[]} // Empty for now
+        players={[]}
       />
     </div>
   );

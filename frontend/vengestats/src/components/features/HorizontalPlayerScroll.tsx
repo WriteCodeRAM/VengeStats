@@ -51,11 +51,13 @@ export function HorizontalPlayerScroll({
                   former_team_abbr: player.former_team_abbr,
                   player_id: player.player_id,
                   nba_api_id: player.nba_api_id,
+                  nfl_data_id: player.nfl_data_id,
                   injury_status: player.injury_status,
                   venge_score: player.venge_score,
                   record: player.record,
                   total_revenge_games: player.total_revenge_games,
                   current_team_name: player.current_team_name,
+                  league: player.league,
                 }}
               />
             </div>

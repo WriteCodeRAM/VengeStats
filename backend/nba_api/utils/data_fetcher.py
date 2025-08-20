@@ -26,14 +26,12 @@ def get_stats(player_id, opponent=None, after_date=None):
     
     for season in seasons:
         try:
-            print(f"Fetching data for season {season}...")
             gamelog = PlayerGameLog(player_id=player_id, season=season)
             df = gamelog.get_data_frames()[0]
             
             if not df.empty:
                 all_games.append(df)
         except Exception as e:
-            print(f"Error fetching season {season}: {e}")
             continue
     
     if not all_games:

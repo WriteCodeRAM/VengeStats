@@ -11,6 +11,8 @@ interface PlayerCardProps {
     former_team_name: string;
     injury_status: string;
     venge_score: number;
+    nba_api_id?: number;
+    nfl_data_id?: string;
     record: string;
     total_revenge_games: number;
     current_team_name: string;
@@ -20,8 +22,8 @@ interface PlayerCardProps {
 
 export function PlayerCard({ player }: PlayerCardProps) {
   const router = useRouter();
-  const handleClick = (e: React.MouseEvent) => {
-    router.push(`/nba/player/${player.player_id}`);
+  const handleClick = () => {
+    router.push(`/${player.league}/player/${player.player_id}`);
   };
 
   const getVengeScoreBg = (score: number) => {
@@ -57,7 +59,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
       onClick={handleClick}
     >
       <CardContent className="p-6">
-        {/* Header with team matchup and venge score */}
+        {/* header with team matchup and venge score */}
         <div className="flex justify-between items-center mb-4">
           <span className="text-white font-semibold">
             {player.current_team_name || "TBD"} vs {player.former_team_abbr}
@@ -69,7 +71,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
           </Badge>
         </div>
 
-        {/* Player Info */}
+        {/* player info */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
@@ -87,7 +89,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* stats */}
         <div className="flex gap-6 mb-4">
           <div className="text-center">
             <div className="text-lg font-bold text-text-primary">
@@ -103,7 +105,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
           </div>
         </div>
 
-        {/* Player Status */}
+        {/* player status */}
         <div className="pt-3 border-t border-borderDefault">
           <span className={`${status.color} text-sm flex items-center gap-1`}>
             <span>{status.icon}</span>

@@ -7,10 +7,12 @@ from backend.nba_api.utils.player_utils import search_player
 from backend.db.queries.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
 from backend.db.queries.players import get_total_games_played_for_team, get_player_career_history
 import time
+from typing import List
+from backend.types.revenge_types import EnrichedNBARevengePlayer
 
-def get_daily_revenge_matchups():
+def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()
-    revenge_games = get_revenge_games([[24,21], [14,6], [26,2]]) 
+    revenge_games = get_revenge_games([[14,6], [26,2]]) 
     updated_games = get_nba_injuries(revenge_games)
     
     enriched_games = []

@@ -1,6 +1,6 @@
 from backend.db.database import get_connection
-from backend.types_def import NBARevengeGame
 from typing import List, Tuple
+from backend.types.revenge_types import NFLRevengePlayer, NBARevengePlayer
 
 REVENGE_GAME_QUERY = """
 SELECT DISTINCT 
@@ -23,7 +23,90 @@ WHERE
 GROUP BY p.id, p.first_name, p.last_name, curr_team.name, former_team.name, former_team.id;
 """
 
-def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengeGame]:
+NFL_REVENGE_GAME_QUERY = """
+SELECT DISTINCT 
+    p.id AS player_id, 
+    p.nfl_data_py_player_id as nfl_id,
+    p.first_name, 
+    p.last_name, 
+    p.display_name,
+    p.current_team_id,
+    p.position,
+    p.usage_tier,
+    p.years_exp,
+    p.draft_team,
+    p.pro_bowl_selections,
+    p.all_pro_selections,
+    former_team.team_name AS former_team_name,
+    former_team.team_abbreviation AS former_team_abbr,
+    former_team.id AS opponent_team_id,
+    curr_team.team_name AS current_team_name,
+    curr_team.team_abbreviation AS current_team_abbr,
+    MAX(pts.season_start) AS season_start,
+    MAX(pts.season_end) AS most_recent_departure_season,
+    SUM(pts.games_played) AS total_games_played_for_team
+FROM nfl_players p
+JOIN nfl_player_stints pts ON p.id = pts.player_id
+JOIN nfl_teams former_team ON pts.team_id = former_team.id
+JOIN nfl_teams curr_team ON p.current_team_id = curr_team.id
+WHERE 
+    p.is_active = true
+    AND p.position IN ('QB', 'RB', 'TE', 'WR')
+    AND pts.team_id != p.current_team_id  -- Player must have played for a different team
+    AND (
+        (p.current_team_id = %s AND pts.team_id = %s)
+        OR 
+        (p.current_team_id = %s AND pts.team_id = %s)
+    )
+GROUP BY p.id, p.nfl_data_py_player_id, p.first_name, p.last_name, p.display_name, p.current_team_id, 
+         p.position, p.usage_tier, p.years_exp, p.draft_team, p.pro_bowl_selections,
+         p.all_pro_selections, former_team.team_name, former_team.team_abbreviation, former_team.id,
+         curr_team.team_name, curr_team.team_abbreviation;
+"""
+    
+def get_nfl_revenge_games(schedule: List[List[int]]) -> List[NFLRevengePlayer]:
+    with get_connection() as conn: 
+        with conn.cursor() as cursor:
+            revenge_games = []
+            for matchup in schedule:
+                away_team, home_team = matchup[0], matchup[1]
+                cursor.execute(NFL_REVENGE_GAME_QUERY, (away_team, home_team, home_team, away_team))
+                players = cursor.fetchall()  
+
+                for player in players:
+                    # Calculate revenge record starting from departure year
+                    former_team_abbr = player[13]  # former_team_abbr from query
+                    departure_year = player[18]    # departure_year
+                    nfl_data_id = player[1]       # nfl_data_id
+                    
+                    revenge_games.append({
+                        'player_id': player[0],
+                        'name': f"{player[2]} {player[3]}",
+                        'nfl_data_id': nfl_data_id,
+                        'display_name': player[4],
+                        'current_team_id': player[5],
+                        'position': player[6],
+                        'usage_tier': player[7],
+                        'years_exp': player[8],
+                        'draft_team': player[9],
+                        'pro_bowl_selections': player[10],
+                        'all_pro_selections': player[11],
+                        'former_team_name': player[12],
+                        'former_team_abbr': former_team_abbr,
+                        'opponent_team_id': player[14],
+                        'current_team_name': player[15],
+                        'current_team_abbr': player[16],
+                        'season_start': player[17],
+                        'departure_year': departure_year,
+                        'total_games_played_for_team': player[19],
+                        'injury_status': 'Healthy',
+                        'league': 'NFL'
+                    })
+                    
+            return revenge_games
+
+
+def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengePlayer]:
     with get_connection() as conn: 
         with conn.cursor() as cursor:
             revenge_games = []
@@ -41,7 +124,6 @@ def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengeGame]:
                         player[6]                    # departure date (most recent stint)
                     ])
             return revenge_games
-
 
 
 def check_first_revenge_game(player_id: int, team_id: int) -> bool:

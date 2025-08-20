@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { HorizontalPlayerScroll } from "./HorizontalPlayerScroll";
-import { RevengePlayer } from "@/types/player";
+import { NBARevengePlayer, NFLRevengePlayer } from "@/types/player";
 
 export function RevengePlayersList() {
-  const [nbaPlayers, setNbaPlayers] = useState<RevengePlayer[]>([]);
+  const [nbaPlayers, setNBAPlayers] = useState<NBARevengePlayer[]>([]);
+  const [nflPlayers, setNFLPlayers] = useState<NFLRevengePlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,11 +24,19 @@ export function RevengePlayersList() {
         console.log("API Response:", data);
 
         const nbaPlayers = data.nba_revenge_matchups || [];
-        const sortedPlayers = nbaPlayers.sort(
-          (a: RevengePlayer, b: RevengePlayer) => b.venge_score - a.venge_score
+        const nflPlayers = data.nfl_revenge_matchups || [];
+        const sortedNBAPlayers = nbaPlayers.sort(
+          (a: NBARevengePlayer, b: NBARevengePlayer) =>
+            b.venge_score - a.venge_score
         );
 
-        setNbaPlayers(sortedPlayers);
+        const sortedNFLPlayers = nflPlayers.sort(
+          (a: NFLRevengePlayer, b: NFLRevengePlayer) =>
+            b.venge_score - a.venge_score
+        );
+
+        setNBAPlayers(sortedNBAPlayers);
+        setNFLPlayers(sortedNFLPlayers);
       } catch (err) {
         console.error("Failed to fetch players:", err);
         setError(
@@ -69,8 +78,8 @@ export function RevengePlayersList() {
       {/* NFL Section */}
       <HorizontalPlayerScroll
         title="NFL Revenge Games 🏈"
-        subtitle="Coming soon..."
-        players={[]}
+        subtitle={`${nflPlayers.length} players seeking vengeance this week`}
+        players={nflPlayers}
       />
     </div>
   );

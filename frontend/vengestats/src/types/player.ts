@@ -1,4 +1,4 @@
-export interface PlayerStats {
+export interface NBAPlayerStats {
   points: number;
   rebounds: number;
   assists: number;
@@ -6,9 +6,9 @@ export interface PlayerStats {
   games: number;
 }
 
-export interface Differentials {
-  revenge_stats: PlayerStats;
-  regular_stats: PlayerStats;
+export interface NBADifferentials {
+  revenge_stats: NBAPlayerStats;
+  regular_stats: NBAPlayerStats;
   differences: {
     points_diff: number;
     rebounds_diff: number;
@@ -26,7 +26,7 @@ export interface CareerStint {
   is_current: boolean;
 }
 
-export interface RevengePlayer {
+export interface NBARevengePlayer {
   player_id: number;
   nba_api_id: number;
   name: string;
@@ -40,12 +40,32 @@ export interface RevengePlayer {
   league: string;
 }
 
-export interface PlayerProfileData extends RevengePlayer {
+export interface NFLRevengePlayer {
+  player_id: number;
+  nfl_data_id: string;
+  player_name: string;
+  display_name: string;
+  current_team_id: number;
+  position: string;
+  usage_tier: string;
+  years_exp: number | null;
+  draft_team: string | null;
+  pro_bowl_selections: number | null;
+  all_pro_selections: number | null;
+  former_team_name: string;
+  former_team_id: number;
+  season_start: number;
+  departure_year: number;
+  total_games_played_for_team: number;
+  venge_score: number;
+}
+
+export interface PlayerProfileData extends NBARevengePlayer {
   departure_date: string;
   departure_year: number;
   total_games: number;
   wins: number;
   losses: number;
-  differentials: Differentials | null;
+  differentials: NBADifferentials | null;
   history: CareerStint[];
 }

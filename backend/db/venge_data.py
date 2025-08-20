@@ -2,6 +2,8 @@ from backend.db.queries.players import get_total_games_played, get_total_games_p
 from backend.db.queries.revenge_games import check_first_revenge_game
 from backend.db.queries.teams import get_prev_team_id
 from backend.nba_api.utils.data_fetcher import compare_stats
+import numpy as np
+import pandas as pd
 
 # All-Star Selections for 2024-2025 Season
 all_stars = {
@@ -30,15 +32,22 @@ notable_revenge_narratives = {
 
 def convert_numpy_to_python(obj):
     """Recursively convert numpy types to Python types"""
-    if hasattr(obj, 'item'):  # numpy scalar
+    if obj is None:
+        return None
+    elif isinstance(obj, (np.integer, np.int32, np.int64)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float32, np.float64)):
         return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif hasattr(obj, 'item'):  # numpy scalar fallback
+        return obj.item()
     elif isinstance(obj, dict):
         return {key: convert_numpy_to_python(value) for key, value in obj.items()}
     elif isinstance(obj, list):
         return [convert_numpy_to_python(item) for item in obj]
     else:
         return obj
-
 
 def calculate_venge_score(
     player_id: int,
@@ -133,13 +142,136 @@ def calculate_venge_score(
                 score += performance_score
                 print(f"Performance boost: +{performance_score:.1f} points")
     else: 
-        # recall the api 
         print("error: need to recall nba_api")
 
-    # Ensure minimum score of 1 and cap at 10
+    # ensure minimum score of 1 and cap at 10
     final_score = max(1.0, min(score, 10.0))
-    # returns score and differentials
+    # return score and differentials
     return [round(final_score, 1), convert_numpy_to_python(comparison)]
+
+def calculate_nfl_venge_score(
+    player_data: dict,
+    revenge_games_data=None,
+    non_revenge_games_data=None
+) -> list:
+    from backend.nfl_api.utils.player_stats import compare_nfl_stats
+
+    player_name = player_data['name']
+    position = player_data['position']
+    usage_tier = player_data['usage_tier']
+    pro_bowl_selections = player_data['pro_bowl_selections'] or 0
+    all_pro_selections = player_data['all_pro_selections'] or 0
+    draft_team = player_data['draft_team']
+    opponent_team_id = player_data['opponent_team_id']
+    total_games_played_for_team = player_data['total_games_played_for_team']
+    years_exp = player_data['years_exp'] or 0
+    most_recent_departure = player_data['departure_year'] or 0
+    
+    print(f"{player_name} ({position}): {total_games_played_for_team} games with former team")
+    
+    score = 1.5  
+    comparison = None
+
+    # 1. TENURE IMPACT (0-3.5 points) 
+    if total_games_played_for_team > 0:
+        if total_games_played_for_team >= 48:  # 3+ full seasons
+            tenure_score = 3.0 + min((total_games_played_for_team - 48) * 0.02, 0.5)  # 3.0-3.5 points
+        elif total_games_played_for_team >= 32:  # 2-3 seasons
+            tenure_score = 2.2 + (total_games_played_for_team - 32) * 0.05  # 2.2-3.0 points
+        elif total_games_played_for_team >= 16:  # 1-2 seasons  
+            tenure_score = 1.3 + (total_games_played_for_team - 16) * 0.056  # 1.3-2.2 points
+        else:  # Less than 1 season
+            tenure_score = 0.5 + total_games_played_for_team * 0.05  # 0.5-1.3 points
+        
+        score += tenure_score
+
+    # 2. DRAFT TEAM BONUS (2.5 points) - Facing the team that drafted you
+    if draft_team and str(opponent_team_id) in str(draft_team):
+        score += 2.5
+
+    # 3. USAGE TIER IMPACT (0-2 points) 
+    usage_multipliers = {
+        'STARTER': 2.0,     # Increased from 1.5
+        'ROTATIONAL': 1.2,  # Increased from 1.0
+        'BACKUP': 0.6,      # Increased from 0.5
+        'INACTIVE': 0.2     # Increased from 0.0
+    }
+    score += usage_multipliers.get(usage_tier, 0.8)
+
+    # 4. PRO BOWL/ALL-PRO STATUS (0-2.5 points) - Higher ceiling
+    if all_pro_selections >= 3:
+        score += 2.5  # Elite players
+    elif all_pro_selections > 0:
+        score += 2.0  # All-Pro players
+    elif pro_bowl_selections >= 3:
+        score += 1.5  # Multiple Pro Bowls
+    elif pro_bowl_selections > 0:
+        score += 1.0  # Pro Bowl players
+
+    # 5. RECENCY BONUS (0-1.5 points) 
+    current_year = 2024 
+    years_since_departure = current_year - most_recent_departure
+    if years_since_departure <= 1:
+        score += 1.5  # Left very recently
+    elif years_since_departure <= 2:
+        score += 1.0  # Left recently
+    elif years_since_departure <= 3:
+        score += 0.5  # Still relatively recent
+
+
+    #  PERFORMANCE-BASED REVENGE FACTOR (0-3 points)
+    if revenge_games_data is not None and non_revenge_games_data is not None:
+        if len(revenge_games_data) >= 1 and len(non_revenge_games_data) >= 3:  # More lenient minimums
+            comparison = compare_nfl_stats(revenge_games_data, non_revenge_games_data, position)
+            
+            if "error" not in comparison:
+                diffs = comparison['differences']
+                
+                # Position-specific revenge factor calculation (same weights)
+                if position == 'QB':
+                    revenge_factor = (
+                        diffs['passing_yards_diff'] * 0.01 + 
+                        diffs['passing_tds_diff'] * 0.5 +     
+                        diffs['fantasy_points_diff'] * 0.1 -   
+                        diffs['interceptions_diff'] * 0.5     
+                    )
+                elif position == 'RB':
+                    revenge_factor = (
+                        diffs['rushing_yards_diff'] * 0.015 +    
+                        diffs['rushing_tds_diff'] * 0.7 +        
+                        diffs['receiving_yards_diff'] * 0.02 +   
+                        diffs['fantasy_points_diff'] * 0.08      
+                    )
+                elif position in ['WR', 'TE']:
+                    revenge_factor = (
+                        diffs['receiving_yards_diff'] * 0.012 +  
+                        diffs['receiving_tds_diff'] * 0.8 +      
+                        diffs['receptions_diff'] * 0.2 +         
+                        diffs['fantasy_points_diff'] * 0.08      
+                    )
+                else:
+                    revenge_factor = 0
+                
+                # Expanded 0-3 point scale
+                if revenge_factor >= 4:
+                    performance_score = 3.0
+                elif revenge_factor >= 3:
+                    performance_score = 2.5
+                elif revenge_factor >= 2:
+                    performance_score = 2.0
+                elif revenge_factor >= 1:
+                    performance_score = 1.5
+                elif revenge_factor >= 0:
+                    performance_score = 0.8
+                else:
+                    performance_score = 0.0
+                
+                score += performance_score
+                print(f"Performance boost: +{performance_score:.1f} points (revenge factor: {revenge_factor:.2f})")
+
+    final_score = max(2.0, min(score, 10.0)) 
+    
+    return [round(final_score, 1), comparison]
 
 def get_venge_score_breakdown(
     player_id: int,

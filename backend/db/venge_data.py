@@ -1,6 +1,6 @@
-from backend.db.queries.players import get_total_games_played, get_total_games_played_for_team
+from backend.db.queries.nba.players import get_total_games_played, get_total_games_played_for_team
 from backend.db.queries.revenge_games import check_first_revenge_game
-from backend.db.queries.teams import get_prev_team_id
+from backend.db.queries.nba.teams import get_prev_team_id
 from backend.nba_api.utils.data_fetcher import compare_stats
 import numpy as np
 import pandas as pd

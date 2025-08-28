@@ -1,5 +1,5 @@
-from backend.db.queries.players import get_player_id, insert_player_team_stint, move_player_to_team
-from backend.db.queries.teams import teams, get_current_nba_roster, update_prev_team_id
+from backend.db.queries.nba.players import get_player_id, insert_player_team_stint, move_player_to_team
+from backend.db.queries.nba.teams import teams, get_current_nba_roster, update_prev_team_id
 from backend.scrapers.player_scrapers import get_player_urls, get_player_history
 import time
 

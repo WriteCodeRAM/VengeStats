@@ -1,7 +1,7 @@
 from nba_api.stats.endpoints import CommonTeamRoster
 import time
-from backend.db.queries.teams import team_id_to_nba_api_id, teams
-from backend.db.queries.players import get_player_id, insert_api_player_stint
+from backend.db.queries.nba.teams import team_id_to_nba_api_id, teams
+from backend.db.queries.nba.players import get_player_id, insert_api_player_stint
 from backend.nba_api.utils.player_utils import get_player_stints_from_nba_api
 
 error_log = []
@@ -11,8 +11,7 @@ def log_player_error(player_name, team_abbr, error_message):
     error_log.append(error_entry)
     print(f"🚨 LOGGED ERROR: {error_entry}")
 
-
-def get_team_roster_from_api(team_id, season="2024-25"):
+def get_team_roster_from_api(team_id, season="2025-26"):
     """
     Get current roster using NBA API
     """
@@ -47,7 +46,7 @@ def process_single_team_api(team_abbr):
     # Get internal team ID from abbreviation
     internal_team_id = teams.get(team_abbr.upper())
     if not internal_team_id:
-        print(f"❌ Unknown team abbreviation: {team_abbr}")
+        print(f"❌ Unknown team abbreviation: {team_abbr}") 
         print(f"Available teams: {', '.join(teams.keys())}")
         return
     
@@ -89,7 +88,7 @@ def process_single_team_api(team_abbr):
                 print(f"  📊 Database Player ID: {db_player_id}")
                 
                 # Get stint history
-                stints = get_player_stints_from_nba_api(player['player_id'], player['full_name'])
+                stints = get_player_stints_from_nba_api(player['player_id'], player['full_name'], team_abbr)
                 
                 if not stints:
                     print("  ⚠️  No stint data found")
@@ -140,7 +139,7 @@ def process_single_team_api(team_abbr):
 
 
 teams_to_process = [
-    'SAS', 'TOR', 'UTA', 'WAS'
+    'NYK'
 ]
 
 if __name__ == "__main__":
@@ -161,4 +160,3 @@ if __name__ == "__main__":
     print(f"\n🚨 PLAYERS WITH ERRORS ({len(error_log)} total):")
     for error in error_log:
         print(f" - {error}")
-    

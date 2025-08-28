@@ -1,6 +1,6 @@
 from typing import List, Tuple
 import requests
-from backend.db.queries.teams import teams
+from backend.db.queries.nba.teams import teams
 
 def get_nba_schedule() -> List[str]: 
     url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"

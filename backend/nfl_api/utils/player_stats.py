@@ -51,9 +51,21 @@ def get_nfl_stats(player_id, opponent_team_abbr=None, after_season=None):
     
     # Filter by opponent if provided
     if opponent_team_abbr:
+        print(f"Filtering for opponent: {opponent_team_abbr}")
+        before_filter = len(df_combined)
         df_combined = df_combined[df_combined['opponent_team'] == opponent_team_abbr]
-
+        after_filter = len(df_combined)
+        print(f"Games before filter: {before_filter}, after filter: {after_filter}")
+        
+        # Debug: Print the actual games found
+        if not df_combined.empty:
+            print("Revenge games found:")
+            for _, game in df_combined.iterrows():
+                print(f"  Season {game['season']}, Week {game['week']}: {game['recent_team']} vs {game['opponent_team']}")
+    
     return df_combined.sort_values(['season', 'week'])
+
+# print(get_nfl_stats('00-0033040', 'KC', 2021)) 
 
 def get_nfl_fair_comparison(player_id: str, former_team_abbr: str, after_season: int):
     """
@@ -307,7 +319,3 @@ def get_all_nfl_player_data(player_id: str, former_team_abbr: str, after_season:
     except Exception as e:
         print(f"Error getting player data for {player_id}: {e}")
         return pd.DataFrame(), pd.DataFrame(), 0, 0, 0
-
-    
-# mayfield
-# print(get_all_nfl_player_data('00-0034837', 'ATL', 2021))

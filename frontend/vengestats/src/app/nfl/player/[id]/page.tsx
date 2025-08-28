@@ -75,7 +75,6 @@ export default function NFLPlayerProfilePage({
         }
 
         const playerData = await response.json();
-        console.log("NFL Player data:", playerData);
         setPlayer(playerData);
       } catch (err) {
         console.error("Failed to fetch NFL player:", err);
@@ -206,6 +205,37 @@ export default function NFLPlayerProfilePage({
   };
 
   const statLabels = getStatLabels(player.position);
+
+  // Display logic for small sample sizes
+  const shouldShowTotals = player.total_revenge_games <= 3;
+
+  const getDisplayValue = (
+    avgValue: number,
+    gameCount: number,
+    shouldShowTotal: boolean,
+    isCountStat: boolean = false
+  ) => {
+    if (shouldShowTotal) {
+      const total = avgValue * gameCount;
+      return isCountStat && total % 1 === 0
+        ? total.toString()
+        : total.toFixed(1);
+    }
+    return isCountStat && avgValue % 1 === 0
+      ? avgValue.toString()
+      : avgValue.toFixed(1);
+  };
+
+  const getDisplayLabel = (baseLabel: string, shouldShowTotal: boolean) => {
+    return shouldShowTotal ? `Total ${baseLabel}` : `${baseLabel} Per Game`;
+  };
+
+  const formatStat = (value: number, isCountStat: boolean = false) => {
+    if (isCountStat) {
+      return value % 1 === 0 ? value.toString() : value.toFixed(1);
+    }
+    return value.toFixed(1);
+  };
 
   return (
     <div className="bg-dark-bg min-h-screen">
@@ -410,45 +440,79 @@ export default function NFLPlayerProfilePage({
                     </p>
                   </div>
                   <span className="bg-red-900/30 text-venge-red px-3 py-1 rounded-lg text-sm font-semibold">
-                    {player.total_revenge_games} games
+                    {player.total_revenge_games}{" "}
+                    {player.total_revenge_games > 1 ? "games" : "game"}
                   </span>
                 </div>
                 <div className="space-y-4">
                   <StatRow
-                    label={statLabels.stat1.label}
-                    value={
+                    label={getDisplayLabel(
+                      statLabels.stat1.label,
+                      shouldShowTotals
+                    )}
+                    value={getDisplayValue(
                       player.differentials.revenge_stats[
                         statLabels.stat1.key
-                      ]?.toFixed(1) || "0.0"
-                    }
+                      ] || 0,
+                      player.total_revenge_games,
+                      shouldShowTotals
+                    )}
                     color="text-venge-red"
                   />
                   <StatRow
-                    label={statLabels.stat2.label}
-                    value={
+                    label={getDisplayLabel(
+                      statLabels.stat2.label,
+                      shouldShowTotals
+                    )}
+                    value={getDisplayValue(
                       player.differentials.revenge_stats[
                         statLabels.stat2.key
-                      ]?.toFixed(1) || "0.0"
-                    }
+                      ] || 0,
+                      player.total_revenge_games,
+                      shouldShowTotals,
+                      true // count stat (TDs etc.)
+                    )}
                     color="text-venge-red"
                   />
                   <StatRow
-                    label={statLabels.stat3.label}
-                    value={
+                    label={getDisplayLabel(
+                      statLabels.stat3.label,
+                      shouldShowTotals
+                    )}
+                    value={getDisplayValue(
                       player.differentials.revenge_stats[
                         statLabels.stat3.key
-                      ]?.toFixed(1) || "0.0"
-                    }
+                      ] || 0,
+                      player.total_revenge_games,
+                      shouldShowTotals,
+                      statLabels.stat3.label.toLowerCase().includes("td") ||
+                        statLabels.stat3.label
+                          .toLowerCase()
+                          .includes("receptions") ||
+                        statLabels.stat3.label
+                          .toLowerCase()
+                          .includes("completions") ||
+                        statLabels.stat3.label.toLowerCase().includes("carries") // detect count stats
+                    )}
                     color="text-venge-red"
                   />
                   {statLabels.stat4.key !== statLabels.stat3.key && (
                     <StatRow
-                      label={statLabels.stat4.label}
-                      value={
+                      label={getDisplayLabel(
+                        statLabels.stat4.label,
+                        shouldShowTotals
+                      )}
+                      value={getDisplayValue(
                         player.differentials.revenge_stats[
                           statLabels.stat4.key
-                        ]?.toFixed(1) || "0.0"
-                      }
+                        ] || 0,
+                        player.total_revenge_games,
+                        shouldShowTotals,
+                        statLabels.stat4.label.toLowerCase().includes("td") ||
+                          statLabels.stat4.label
+                            .toLowerCase()
+                            .includes("targets")
+                      )}
                       color="text-venge-red"
                     />
                   )}

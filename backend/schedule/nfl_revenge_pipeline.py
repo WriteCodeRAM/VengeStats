@@ -4,7 +4,8 @@ from backend.db.queries.nfl.teams import NFL_TEAM_ID_TO_ABBR
 from backend.nfl_api.utils.player_stats import get_all_nfl_player_data
 
 def get_weekly_revenge_matchups(): 
-    matchups = [["5", "27"],  ["15", "12"]]
+    matchups = [["10", "14"], ["5", "27"],  ["15", "12"]]
+    # ["5", "27"],  ["15", "12"]
 
     revenge_players = get_nfl_revenge_games(matchups)
     

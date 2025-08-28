@@ -69,7 +69,7 @@ async def matchups():
                 "league": "nfl"
             })
 
-            # Clean numpy types before caching
+            # clean numpy types before caching
             cleaned_player = convert_numpy_to_python(player)
             nfl_player_profiles_cache[player["player_id"]] = cleaned_player
             
@@ -89,8 +89,3 @@ async def get_nfl_player_profile(player_id: int):
     if player_id in nfl_player_profiles_cache:
         return nfl_player_profiles_cache[player_id]
     raise HTTPException(status_code=404, detail="Player not found") 
-
-#TODO : 
-# GET NFL PROFILES SETUP 
-# HANDLE ROSTER CHANGES 
-# LOOK INTO REDIS AND HOW SERVER WORKS WITH PIPELINES

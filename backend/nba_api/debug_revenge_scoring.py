@@ -1,8 +1,8 @@
 from backend.nba_api.utils.player_utils import search_player
 from backend.nba_api.utils.data_fetcher import get_fair_comparison, compare_stats
 from backend.db.venge_data import calculate_venge_score
-from backend.db.queries.players import get_player_id
-from backend.db.queries.teams import teams
+from backend.db.queries.nba.players import get_player_id
+from backend.db.queries.nba.teams import teams
 import time
 
 def test_player_revenge_scoring(player_name: str, former_team_abbr: str, departure_date: str, current_team_abbr: str):
@@ -170,4 +170,3 @@ if __name__ == "__main__":
             print(f"❌ Error testing {player_name}: {e}")
         
         print("\n" + "="*60 + "\n")
-    

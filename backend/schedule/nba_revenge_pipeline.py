@@ -4,15 +4,15 @@ from backend.scrapers.injury_scrapers import get_nba_injuries
 from backend.db.venge_data import calculate_venge_score
 from backend.nba_api.utils.data_fetcher import get_fair_comparison
 from backend.nba_api.utils.player_utils import search_player
-from backend.db.queries.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
-from backend.db.queries.players import get_total_games_played_for_team, get_player_career_history
+from backend.db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
+from backend.db.queries.nba.players import get_total_games_played_for_team, get_player_career_history
 import time
 from typing import List
 from backend.types.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()
-    revenge_games = get_revenge_games([[14,6], [26,2]]) 
+    revenge_games = get_revenge_games([[14,6], [26,2], [3,16], [29,16], [16,13]]) 
     updated_games = get_nba_injuries(revenge_games)
     
     enriched_games = []
@@ -80,5 +80,3 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
         enriched_games.append(enriched_player)
     
     return enriched_games
-
-# print(get_daily_revenge_matchups())

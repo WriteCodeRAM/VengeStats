@@ -1,3 +1,6 @@
+import redis
+import json
+import os
 from backend.schedule.nba_revenge_pipeline import get_daily_revenge_matchups
 from backend.schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
 from backend.db.venge_data import convert_numpy_to_python
@@ -6,10 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# bootleg cache for now upgrade to redis soon
-cache = {"nba_revenge_matchups": None, "nfl_revenge_matchups": None} 
-nba_player_profiles_cache = {}
-nfl_player_profiles_cache = {} 
+# Redis connection
+redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379')
+redis_client = redis.from_url(redis_url, decode_responses=True)
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,73 +21,129 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def get_from_cache(key):
+    """Get data from Redis cache"""
+    try:
+        data = redis_client.get(key)
+        if data:
+            return json.loads(data)
+        return None
+    except Exception as e:
+        print(f"Redis get error: {e}")
+        return None
+
+def set_in_cache(key, data, expiry=3600):  
+    """Set data in Redis cache with expiry"""
+    try:
+        redis_client.setex(key, expiry, json.dumps(data, default=str))
+    except Exception as e:
+        print(f"Redis set error: {e}")
+
 @app.get("/")
 async def root():
     return {"message": "Yo"}
 
 @app.get("/matchups")
 async def matchups():
-    if not cache["nba_revenge_matchups"]: 
-        nba_revenge_games = get_daily_revenge_matchups()
+    # Check cache first
+    cached_matchups = get_from_cache("all_matchups")
+    if cached_matchups:
+        print("Returning cached matchups")
+        return cached_matchups
+    
+    print("Generating fresh matchups...")
+    
+    # generate NBA matchups
+    nba_revenge_games = get_daily_revenge_matchups()
+    lightweight_nba_games = []
+    
+    for player in nba_revenge_games:
+        lightweight_nba_games.append({
+            "player_id": player["player_id"],
+            "name": player["name"],
+            "former_team_abbr": player["former_team_abbr"], 
+            "former_team_name": player["former_team_name"],
+            "current_team_name": player["current_team_abbr"],
+            "nba_api_id": player["nba_api_id"],
+            "venge_score": player["venge_score"],
+            "injury_status": player["injury_status"],
+            "record": player["record"],
+            "total_revenge_games": player["total_revenge_games"], 
+            "league": "nba"
+        })
+        # Cache NBA player profiles until October 21 
+        cleaned_player = convert_numpy_to_python(player)
+        set_in_cache(f"nba_player_{player['player_id']}", cleaned_player, 4233600)
 
-        
-        # lightweight data for home page
-        lightweight_nba_games = []
-        for player in nba_revenge_games:
-            lightweight_nba_games.append({
-                "player_id": player["player_id"],
-                "name": player["name"],
-                "former_team_abbr": player["former_team_abbr"], 
-                "former_team_name": player["former_team_name"],
-                "current_team_name": player["current_team_abbr"],
-                "nba_api_id": player["nba_api_id"],
-                "venge_score": player["venge_score"],
-                "injury_status": player["injury_status"],
-                "record": player["record"],
-                "total_revenge_games": player["total_revenge_games"], 
-                "league": "nba"
-            })
-            nba_player_profiles_cache[player["player_id"]] = player
+    # generate NFL matchups  
+    nfl_revenge_games = get_weekly_revenge_matchups()
+    lightweight_nfl_games = []
+    
+    for player in nfl_revenge_games: 
+        lightweight_nfl_games.append({ 
+            "player_id": player["player_id"],
+            "current_team_name": player["current_team_abbr"], 
+            "record": player["record"],
+            "nfl_data_id": player["nfl_data_id"],
+            "name": player["name"], 
+            "position": player["position"], 
+            "former_team_abbr": player["former_team_abbr"], 
+            "games_played": player["total_games_played_for_team"], 
+            "total_revenge_games": player["total_revenge_games"],
+            "venge_score": player["revenge_score"], 
+            "league": "nfl"
+        })
+        # Cache NFL player profiles for 1 week (604800 seconds)
+        cleaned_player = convert_numpy_to_python(player)
+        set_in_cache(f"nfl_player_{player['player_id']}", cleaned_player, 604800)
 
-        cache["nba_revenge_matchups"] = lightweight_nba_games
-
-    if not cache["nfl_revenge_matchups"]:
-        
-        lightweight_nfl_games = [] 
-        nfl_revenge_games = get_weekly_revenge_matchups() 
-
-        for player in nfl_revenge_games: 
-            lightweight_nfl_games.append({ 
-                "player_id": player["player_id"],
-                "current_team_name": player["current_team_abbr"], 
-                "record": player["record"],
-                "nfl_data_id": player["nfl_data_id"],
-                "name": player["name"], 
-                "position": player["position"], 
-                "former_team_abbr": player["former_team_abbr"], 
-                "games_played": player["total_games_played_for_team"], 
-                "total_revenge_games": player["total_revenge_games"],
-                "venge_score": player["revenge_score"], 
-                "league": "nfl"
-            })
-
-            # clean numpy types before caching
-            cleaned_player = convert_numpy_to_python(player)
-            nfl_player_profiles_cache[player["player_id"]] = cleaned_player
-            
-        cache["nfl_revenge_matchups"] = lightweight_nfl_games
-        print(nfl_player_profiles_cache)
-
-    return cache
+    matchups_data = {
+        "nba_revenge_matchups": lightweight_nba_games,
+        "nfl_revenge_matchups": lightweight_nfl_games
+    }
+    
+    # Cache the combined matchups for 1 week (NFL schedule drives updates)
+    # NBA data stays static until October 21st anyway
+    set_in_cache("all_matchups", matchups_data, 604800)
+    
+    return matchups_data
 
 @app.get("/nba/player/{player_id}")
 async def get_nba_player_profile(player_id: int):
-    if player_id in nba_player_profiles_cache:
-        return nba_player_profiles_cache[player_id]
+    cached_player = get_from_cache(f"nba_player_{player_id}")
+    if cached_player:
+        return cached_player
+    
     raise HTTPException(status_code=404, detail="Player not found") 
 
 @app.get("/nfl/player/{player_id}")
 async def get_nfl_player_profile(player_id: int):
-    if player_id in nfl_player_profiles_cache:
-        return nfl_player_profiles_cache[player_id]
-    raise HTTPException(status_code=404, detail="Player not found") 
+    cached_player = get_from_cache(f"nfl_player_{player_id}")
+    if cached_player:
+        return cached_player
+        
+    raise HTTPException(status_code=404, detail="Player not found")
+
+@app.get("/cache/clear")
+async def clear_cache():
+    """Clear all cache - useful for development"""
+    try:
+        redis_client.flushall()
+        return {"message": "Cache cleared successfully"}
+    except Exception as e:
+        return {"error": f"Failed to clear cache: {e}"}
+
+@app.get("/cache/status")
+async def cache_status():
+    """Check cache status"""
+    try:
+        info = redis_client.info()
+        keys = redis_client.keys("*")
+        return {
+            "connected": True,
+            "total_keys": len(keys),
+            "memory_usage": info.get("used_memory_human", "Unknown"),
+            "keys": keys[:20] 
+        }
+    except Exception as e:
+        return {"connected": False, "error": str(e)}

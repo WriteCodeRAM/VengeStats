@@ -12,7 +12,7 @@ from backend.types.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()
-    revenge_games = get_revenge_games([[14,6], [26,2], [3,16], [29,16], [16,13]]) 
+    revenge_games = get_revenge_games([[11,21], [10,14]]) 
     updated_games = get_nba_injuries(revenge_games)
     
     enriched_games = []

@@ -1,10 +1,7 @@
 import requests
 import time
 import nfl_data_py as nfl
-import pandas as pd
-from datetime import datetime
-
-from backend.db.queries.nfl.players import insert_nfl_player, insert_nfl_player_stint
+from backend.db.queries.nfl.players import insert_nfl_player, get_existing_player_info, insert_nfl_player_stint
 
 # Target positions
 TARGET_POSITIONS = ['QB', 'RB', 'WR', 'TE']
@@ -37,7 +34,7 @@ def get_team_roster(team_id):
         return None, None
 
 def extract_target_players(roster_data, team_info):
-    """Extract players from target positions"""
+    """Extract players and determine their active status"""
     if not roster_data or 'athletes' not in roster_data:
         return []
     
@@ -50,6 +47,13 @@ def extract_target_players(roster_data, team_info):
                 position_abbr = position_info.get('abbreviation', '')
                 
                 if position_abbr in TARGET_POSITIONS:
+                    # NEW: Check player status from ESPN API
+                    player_status = player.get('status', {})
+                    status_type = player_status.get('type', 'active').lower()
+                    
+                    # Determine if player is active
+                    is_active = status_type not in ['injured_reserve', 'ir', 'out', 'practice_squad', 'ps', 'suspended']
+                    
                     player_data = {
                         'espn_id': player.get('id'),
                         'first_name': player.get('firstName', ''),
@@ -58,28 +62,18 @@ def extract_target_players(roster_data, team_info):
                         'position': position_abbr,
                         'current_team_id': team_info['team_id'],
                         'current_team_abbr': team_info['team_abbr'],
-                        'is_active': True
+                        'is_active': is_active  # NEW: Now properly calculated
                     }
                     players.append(player_data)
-    
-    print(f"📊 Found {len(players)} target players:")
-    position_counts = {}
-    for player in players:
-        pos = player['position']
-        position_counts[pos] = position_counts.get(pos, 0) + 1
-    
-    for pos in TARGET_POSITIONS:
-        if pos in position_counts:
-            print(f"  {pos}: {position_counts[pos]} players")
     
     return players
 
 def find_nfl_data_py_player_id(player_name, position):
     """Find player's nfl-data-py ID by matching name and position"""
     try:
-        print(f"    🔍 Looking up nfl-data-py ID for {player_name} ({position})...")
+        print(f"    Looking up nfl-data-py ID for {player_name} ({position})...")
         
-        current_season = 2024
+        current_season = 2025
         rosters = nfl.import_seasonal_rosters([current_season])
         
         # Try exact match first
@@ -90,32 +84,48 @@ def find_nfl_data_py_player_id(player_name, position):
         
         if not matches.empty:
             player_id = matches.iloc[0]['player_id']
-            print(f"    ✅ Found exact match: {player_id}")
+            print(f"    Found exact match: {player_id}")
             return player_id
         
-        # Try partial name match
-        name_parts = player_name.split()
+        # Clean the name for suffixes only
+        clean_name = player_name.replace(' Sr.', '').replace(' Jr.', '').replace(' III', '').replace(' II', '').replace(' V', '').strip()
+        
+        # Try without suffix
+        matches = rosters[
+            (rosters['player_name'] == clean_name) & 
+            (rosters['position'] == position)
+        ]
+        
+        if not matches.empty:
+            player_id = matches.iloc[0]['player_id']
+            matched_name = matches.iloc[0]['player_name']
+            print(f"    Found match without suffix: {player_id} ({matched_name})")
+            return player_id
+        
+        # Try last name + position match (safer than first name matching)
+        name_parts = clean_name.split()
         if len(name_parts) >= 2:
-            first_name = name_parts[0]
             last_name = name_parts[-1]
             
+            # Only match on exact last name + position
             matches = rosters[
-                (rosters['player_name'].str.contains(first_name, case=False, na=False)) &
-                (rosters['player_name'].str.contains(last_name, case=False, na=False)) &
+                (rosters['player_name'].str.endswith(last_name, na=False)) &
                 (rosters['position'] == position)
             ]
             
-            if not matches.empty:
+            if len(matches) == 1:  # Only if exactly one match
                 player_id = matches.iloc[0]['player_id']
                 matched_name = matches.iloc[0]['player_name']
-                print(f"    ✅ Found partial match: {player_id} ({matched_name})")
+                print(f"    Found last name match: {player_id} ({matched_name})")
                 return player_id
+            elif len(matches) > 1:
+                print(f"    Multiple matches for {last_name} ({position}), skipping for safety")
         
-        print(f"    ⚠️  No match found for {player_name} ({position})")
+        print(f"    No match found for {player_name} ({position})")
         return None
         
     except Exception as e:
-        print(f"    ❌ Error looking up {player_name}: {e}")
+        print(f"    Error looking up {player_name}: {e}")
         return None
 
 def calculate_usage_tier(player_id, position, seasons=[2024]):
@@ -313,16 +323,36 @@ def get_team_mapping():
     }
 
 def process_single_player(player_data):
-    """Process a single player with all new fields"""
+ 
     player_name = player_data['display_name']
     position = player_data['position']
     
-    print(f"🏈 PROCESSING: {player_name} ({position})")
+    print(f"🏈 CHECKING: {player_name} ({position})")
     
     nfl_data_player_id = find_nfl_data_py_player_id(player_name, position)
     if not nfl_data_player_id:
         print(f"    ⚠️  Skipping {player_name} - no nfl-data-py match found")
         return False
+    
+    existing_player = get_existing_player_info(nfl_data_player_id)
+    
+    if existing_player:
+        # check if anything meaningful changed
+        same_team = existing_player['current_team_id'] == player_data['current_team_id']
+        same_status = existing_player['is_active'] == player_data['is_active']
+        
+        if same_team and same_status:
+            print(f"    ⏭️  Skipping {player_name} - no changes detected")
+            return True
+        
+        print(f"    🔄 Changes detected for {player_name}")
+        if not same_team:
+            print(f"      Team change: {existing_player['current_team_id']} -> {player_data['current_team_id']}")
+        if not same_status:
+            status_change = "active" if player_data['is_active'] else "inactive"
+            print(f"      Status change: -> {status_change}")
+    else:
+        print(f"    ➕ New player detected: {player_name}")
     
     print(f"    📊 Gathering player data...")
     usage_tier = calculate_usage_tier(nfl_data_player_id, position)
@@ -351,35 +381,36 @@ def process_single_player(player_data):
             draft_team=draft_team,
             pro_bowl_selections=pro_bowls,
             all_pro_selections=all_pros,
-            is_active=True
+            is_active=player_data['is_active']
         )
-        print(f"    ✅ Inserted player with DB ID: {db_player_id}")
-    except Exception as e:
-        print(f"    ❌ Error inserting player: {e}")
-        return False
-    
-    team_history = get_player_team_history(nfl_data_player_id, player_name)
-    
-    if team_history:
-        stints_inserted = 0
-        for stint in team_history:
-            try:
-                insert_nfl_player_stint(
-                    player_id=db_player_id,
-                    team_id=stint['team_id'],
-                    season_start=stint['season_start'],
-                    season_end=stint['season_end'] if stint['season_end'] != stint['season_start'] else None,
-                    games_played=stint['games_played'],
-                    is_current_stint=stint['is_current_stint']
-                )
-                stints_inserted += 1
-            except Exception as e:
-                print(f"      ❌ Error inserting stint for {stint['team_abbr']}: {e}")
+        print(f"    ✅ Processed player with DB ID: {db_player_id}")
         
-        print(f"    📊 Inserted {stints_inserted}/{len(team_history)} stints")
-    
-    print(f"✅ Completed processing {player_name}")
-    return True
+        if not existing_player:
+            team_history = get_player_team_history(nfl_data_player_id, player_name)
+            if team_history:
+                stints_inserted = 0
+                for stint in team_history:
+                    try:
+                        insert_nfl_player_stint(
+                            player_id=db_player_id,
+                            team_id=stint['team_id'],
+                            season_start=stint['season_start'],
+                            season_end=stint['season_end'] if stint['season_end'] != stint['season_start'] else None,
+                            games_played=stint['games_played'],
+                            is_current_stint=stint['is_current_stint']
+                        )
+                        stints_inserted += 1
+                    except Exception as e:
+                        print(f"      ❌ Error inserting stint for {stint['team_abbr']}: {e}")
+                
+                print(f"    📊 Inserted {stints_inserted}/{len(team_history)} stints")
+        
+        return True
+        
+    except Exception as e:
+        print(f"    ❌ Error processing player: {e}")
+        return False
+
 
 def process_team_roster(team_id):
     """Main function: Process entire roster for a team"""
@@ -411,25 +442,25 @@ def process_team_roster(team_id):
     print(f"📊 Team: {team_info['team_name']}")
     return True
 
-def main():
-    """Test the updated roster processing"""
-    print("=== NFL Roster Processor - New Schema ===")
-    print("🎯 Target positions:", ", ".join(TARGET_POSITIONS))
-    print()
+# def main():
+#     """Test the updated roster processing"""
+#     print("=== NFL Roster Processor - New Schema ===")
+#     print("🎯 Target positions:", ", ".join(TARGET_POSITIONS))
+#     print()
     
 
-    test_team_id = "34" 
-    success = process_team_roster(test_team_id)
+#     test_team_id = "34" 
+#     success = process_team_roster(test_team_id)
     
-    if success:
-        print("\n✅ Roster processing completed successfully!")
-        print("New fields populated:")
-        print("- usage_tier (STARTER/ROTATIONAL/BACKUP/INACTIVE)")
-        print("- draft info (round, number, team)")
-        print("- accolades (Pro Bowls, All-Pros)")
-        print("- years of experience")
-    else:
-        print("\n❌ Roster processing failed")
+#     if success:
+#         print("\n✅ Roster processing completed successfully!")
+#         print("New fields populated:")
+#         print("- usage_tier (STARTER/ROTATIONAL/BACKUP/INACTIVE)")
+#         print("- draft info (round, number, team)")
+#         print("- accolades (Pro Bowls, All-Pros)")
+#         print("- years of experience")
+#     else:
+#         print("\n❌ Roster processing failed")
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

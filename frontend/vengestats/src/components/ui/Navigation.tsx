@@ -32,8 +32,8 @@ export function Navigation() {
           {/* Search Bar */}
           <div className="flex-1 max-w-md mx-8">
             <Input
-              placeholder="Search players, teams, or revenge matchups..."
-              className="bg-dark-card border-borderDefault text-white placeholder:text-text-secondary focus:border-venge-red"
+              placeholder="Search specific players or revenge matchups coming soon..."
+              className="bg-dark-card border-borderDefault text-white placeholder:text-text-secondary focus:border-venge-red cursor-not-allowed"
             />
           </div>
 

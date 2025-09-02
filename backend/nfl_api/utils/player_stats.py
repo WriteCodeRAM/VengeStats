@@ -86,11 +86,110 @@ def get_nfl_fair_comparison(player_id: str, former_team_abbr: str, after_season:
 def compare_nfl_stats(revenge_df, regular_df, position):
     """
     Compare revenge game stats vs regular game stats for NFL using nfl_data_py columns
+    Always return regular stats even when revenge data is insufficient
     """
-    if revenge_df.empty or regular_df.empty:
-        return {"error": "Insufficient data for comparison"}
+    # Return error only if we don't have regular game data
+    if regular_df.empty:
+        return {"error": "No regular game data available"}
     
-    # Position-specific stat calculations
+    # Always calculate regular stats first
+    if position == 'QB':
+        regular_stats = {
+            'passing_yards': regular_df['passing_yards'].mean(),
+            'passing_tds': regular_df['passing_tds'].mean(),
+            'completions': regular_df['completions'].mean(),
+            'attempts': regular_df['attempts'].mean(),
+            'interceptions': regular_df['interceptions'].mean(),
+            'fantasy_points': regular_df['fantasy_points'].mean(),
+            'games': len(regular_df)
+        }
+        
+        # Empty revenge stats structure
+        empty_revenge_stats = {
+            'passing_yards': None,
+            'passing_tds': None,
+            'completions': None,
+            'attempts': None,
+            'interceptions': None,
+            'fantasy_points': None,
+            'games': 0
+        }
+        
+        empty_differences = {
+            'passing_yards_diff': None,
+            'passing_tds_diff': None,
+            'completions_diff': None,
+            'interceptions_diff': None,
+            'fantasy_points_diff': None
+        }
+        
+    elif position == 'RB':
+        regular_stats = {
+            'rushing_yards': regular_df['rushing_yards'].mean(),
+            'rushing_tds': regular_df['rushing_tds'].mean(),
+            'carries': regular_df['carries'].mean(),
+            'receiving_yards': regular_df['receiving_yards'].mean(),
+            'receiving_tds': regular_df['receiving_tds'].mean(),
+            'receptions': regular_df['receptions'].mean(),
+            'fantasy_points': regular_df['fantasy_points_ppr'].mean(),
+            'games': len(regular_df)
+        }
+        
+        empty_revenge_stats = {
+            'rushing_yards': None,
+            'rushing_tds': None,
+            'carries': None,
+            'receiving_yards': None,
+            'receiving_tds': None,
+            'receptions': None,
+            'fantasy_points': None,
+            'games': 0
+        }
+        
+        empty_differences = {
+            'rushing_yards_diff': None,
+            'rushing_tds_diff': None,
+            'carries_diff': None,
+            'receiving_yards_diff': None,
+            'fantasy_points_diff': None
+        }
+        
+    elif position in ['WR', 'TE']:
+        regular_stats = {
+            'receiving_yards': regular_df['receiving_yards'].mean(),
+            'receiving_tds': regular_df['receiving_tds'].mean(),
+            'receptions': regular_df['receptions'].mean(),
+            'targets': regular_df['targets'].mean(),
+            'fantasy_points': regular_df['fantasy_points_ppr'].mean(),
+            'games': len(regular_df)
+        }
+        
+        empty_revenge_stats = {
+            'receiving_yards': None,
+            'receiving_tds': None,
+            'receptions': None,
+            'targets': None,
+            'fantasy_points': None,
+            'games': 0
+        }
+        
+        empty_differences = {
+            'receiving_yards_diff': None,
+            'receiving_tds_diff': None,
+            'receptions_diff': None,
+            'targets_diff': None,
+            'fantasy_points_diff': None
+        }
+    
+    # If no revenge data, return regular stats with empty revenge structure
+    if revenge_df.empty or len(revenge_df) < 1:
+        return {
+            'revenge_stats': empty_revenge_stats,
+            'regular_stats': regular_stats,
+            'differences': empty_differences
+        }
+    
+    # If we have both datasets, calculate revenge stats and differences
     if position == 'QB':
         revenge_stats = {
             'passing_yards': revenge_df['passing_yards'].mean(),
@@ -100,16 +199,6 @@ def compare_nfl_stats(revenge_df, regular_df, position):
             'interceptions': revenge_df['interceptions'].mean(),
             'fantasy_points': revenge_df['fantasy_points'].mean(),
             'games': len(revenge_df)
-        }
-        
-        regular_stats = {
-            'passing_yards': regular_df['passing_yards'].mean(),
-            'passing_tds': regular_df['passing_tds'].mean(),
-            'completions': regular_df['completions'].mean(),
-            'attempts': regular_df['attempts'].mean(),
-            'interceptions': regular_df['interceptions'].mean(),
-            'fantasy_points': regular_df['fantasy_points'].mean(),
-            'games': len(regular_df)
         }
         
         differences = {
@@ -132,17 +221,6 @@ def compare_nfl_stats(revenge_df, regular_df, position):
             'games': len(revenge_df)
         }
         
-        regular_stats = {
-            'rushing_yards': regular_df['rushing_yards'].mean(),
-            'rushing_tds': regular_df['rushing_tds'].mean(),
-            'carries': regular_df['carries'].mean(),
-            'receiving_yards': regular_df['receiving_yards'].mean(),
-            'receiving_tds': regular_df['receiving_tds'].mean(),
-            'receptions': regular_df['receptions'].mean(),
-            'fantasy_points': regular_df['fantasy_points_ppr'].mean(),
-            'games': len(regular_df)
-        }
-        
         differences = {
             'rushing_yards_diff': revenge_stats['rushing_yards'] - regular_stats['rushing_yards'],
             'rushing_tds_diff': revenge_stats['rushing_tds'] - regular_stats['rushing_tds'],
@@ -159,15 +237,6 @@ def compare_nfl_stats(revenge_df, regular_df, position):
             'targets': revenge_df['targets'].mean(),
             'fantasy_points': revenge_df['fantasy_points_ppr'].mean(),
             'games': len(revenge_df)
-        }
-        
-        regular_stats = {
-            'receiving_yards': regular_df['receiving_yards'].mean(),
-            'receiving_tds': regular_df['receiving_tds'].mean(),
-            'receptions': regular_df['receptions'].mean(),
-            'targets': regular_df['targets'].mean(),
-            'fantasy_points': regular_df['fantasy_points_ppr'].mean(),
-            'games': len(regular_df)
         }
         
         differences = {

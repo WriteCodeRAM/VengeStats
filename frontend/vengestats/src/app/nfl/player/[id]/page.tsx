@@ -75,6 +75,7 @@ export default function NFLPlayerProfilePage({
         }
 
         const playerData = await response.json();
+        console.log(playerData);
         setPlayer(playerData);
       } catch (err) {
         console.error("Failed to fetch NFL player:", err);
@@ -146,8 +147,22 @@ export default function NFLPlayerProfilePage({
     return colors[tier] || "bg-gray-900/30 text-gray-400";
   };
 
+  // Check if we have regular stats (check if values are actually numbers, not null)
+  const hasRegularStats =
+    player.differentials &&
+    player.differentials.regular_stats &&
+    player.differentials.regular_stats.games > 0 &&
+    typeof player.differentials.regular_stats.games === "number";
+
+  // Check if we have sufficient revenge data (check if values are numbers, not null)
+  const hasRevengeStats =
+    player.differentials &&
+    player.total_revenge_games >= 1 &&
+    player.differentials.revenge_stats &&
+    player.differentials.revenge_stats.games > 0 &&
+    typeof player.differentials.revenge_stats.games === "number";
+
   const status = getPlayerStatus();
-  const hasStats = player.differentials && player.total_revenge_games >= 1;
 
   // Get position-specific stat labels
   const getStatLabels = (position: string) => {
@@ -206,37 +221,6 @@ export default function NFLPlayerProfilePage({
 
   const statLabels = getStatLabels(player.position);
 
-  // Display logic for small sample sizes
-  const shouldShowTotals = player.total_revenge_games <= 3;
-
-  const getDisplayValue = (
-    avgValue: number,
-    gameCount: number,
-    shouldShowTotal: boolean,
-    isCountStat: boolean = false
-  ) => {
-    if (shouldShowTotal) {
-      const total = avgValue * gameCount;
-      return isCountStat && total % 1 === 0
-        ? total.toString()
-        : total.toFixed(1);
-    }
-    return isCountStat && avgValue % 1 === 0
-      ? avgValue.toString()
-      : avgValue.toFixed(1);
-  };
-
-  const getDisplayLabel = (baseLabel: string, shouldShowTotal: boolean) => {
-    return shouldShowTotal ? `Total ${baseLabel}` : `${baseLabel} Per Game`;
-  };
-
-  const formatStat = (value: number, isCountStat: boolean = false) => {
-    if (isCountStat) {
-      return value % 1 === 0 ? value.toString() : value.toFixed(1);
-    }
-    return value.toFixed(1);
-  };
-
   return (
     <div className="bg-dark-bg min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -247,7 +231,6 @@ export default function NFLPlayerProfilePage({
             {/* Left: Player Image */}
             <div className="col-span-3">
               <div className="w-48 h-48 bg-gray-600 rounded-full overflow-hidden border-4 border-venge-red relative">
-                {/* NFL doesn't have a standard headshot API, so we'll use initials */}
                 <div className="absolute inset-0 w-full h-full flex items-center justify-center text-white font-semibold text-5xl bg-gray-600 rounded-full">
                   {player.name
                     .split(" ")
@@ -296,7 +279,7 @@ export default function NFLPlayerProfilePage({
                 </div>
               </div>
 
-              {/* Career Timeline - Simplified for NFL */}
+              {/* Career Timeline */}
               <div className="mb-6">
                 <div className="text-text-secondary text-sm font-semibold mb-3">
                   CAREER TIMELINE
@@ -425,10 +408,11 @@ export default function NFLPlayerProfilePage({
           </div>
         </div>
 
-        {/* Stats Comparison Section */}
-        {hasStats ? (
+        {/* Stats Section - Show if we have regular stats */}
+        {hasRegularStats ? (
           <>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-8">
+              {/* Revenge Games Section */}
               <div className="bg-dark-card border border-borderDefault rounded-2xl p-6 md:p-8">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                   <div>
@@ -444,91 +428,72 @@ export default function NFLPlayerProfilePage({
                     {player.total_revenge_games > 1 ? "games" : "game"}
                   </span>
                 </div>
-                <div className="space-y-4">
-                  <StatRow
-                    label={getDisplayLabel(
-                      statLabels.stat1.label,
-                      shouldShowTotals
-                    )}
-                    value={getDisplayValue(
-                      player.differentials.revenge_stats[
-                        statLabels.stat1.key
-                      ] || 0,
-                      player.total_revenge_games,
-                      shouldShowTotals
-                    )}
-                    color="text-venge-red"
-                  />
-                  <StatRow
-                    label={getDisplayLabel(
-                      statLabels.stat2.label,
-                      shouldShowTotals
-                    )}
-                    value={getDisplayValue(
-                      player.differentials.revenge_stats[
-                        statLabels.stat2.key
-                      ] || 0,
-                      player.total_revenge_games,
-                      shouldShowTotals,
-                      true // count stat (TDs etc.)
-                    )}
-                    color="text-venge-red"
-                  />
-                  <StatRow
-                    label={getDisplayLabel(
-                      statLabels.stat3.label,
-                      shouldShowTotals
-                    )}
-                    value={getDisplayValue(
-                      player.differentials.revenge_stats[
-                        statLabels.stat3.key
-                      ] || 0,
-                      player.total_revenge_games,
-                      shouldShowTotals,
-                      statLabels.stat3.label.toLowerCase().includes("td") ||
-                        statLabels.stat3.label
-                          .toLowerCase()
-                          .includes("receptions") ||
-                        statLabels.stat3.label
-                          .toLowerCase()
-                          .includes("completions") ||
-                        statLabels.stat3.label.toLowerCase().includes("carries") // detect count stats
-                    )}
-                    color="text-venge-red"
-                  />
-                  {statLabels.stat4.key !== statLabels.stat3.key && (
+
+                {hasRevengeStats ? (
+                  <div className="space-y-4">
                     <StatRow
-                      label={getDisplayLabel(
-                        statLabels.stat4.label,
-                        shouldShowTotals
-                      )}
-                      value={getDisplayValue(
+                      label={statLabels.stat1.label}
+                      value={
                         player.differentials.revenge_stats[
-                          statLabels.stat4.key
-                        ] || 0,
-                        player.total_revenge_games,
-                        shouldShowTotals,
-                        statLabels.stat4.label.toLowerCase().includes("td") ||
-                          statLabels.stat4.label
-                            .toLowerCase()
-                            .includes("targets")
-                      )}
+                          statLabels.stat1.key
+                        ]?.toFixed(1) || "0.0"
+                      }
                       color="text-venge-red"
                     />
-                  )}
-                  <StatRow
-                    label="Record"
-                    value={player.record}
-                    color="text-venge-red"
-                  />
-                  <StatRow
-                    label="Total Games"
-                    value={player.total_revenge_games.toString()}
-                    color="text-venge-red"
-                  />
-                </div>
+                    <StatRow
+                      label={statLabels.stat2.label}
+                      value={
+                        player.differentials.revenge_stats[
+                          statLabels.stat2.key
+                        ]?.toFixed(1) || "0.0"
+                      }
+                      color="text-venge-red"
+                    />
+                    <StatRow
+                      label={statLabels.stat3.label}
+                      value={
+                        player.differentials.revenge_stats[
+                          statLabels.stat3.key
+                        ]?.toFixed(1) || "0.0"
+                      }
+                      color="text-venge-red"
+                    />
+                    {statLabels.stat4.key !== statLabels.stat3.key && (
+                      <StatRow
+                        label={statLabels.stat4.label}
+                        value={
+                          player.differentials.revenge_stats[
+                            statLabels.stat4.key
+                          ]?.toFixed(1) || "0.0"
+                        }
+                        color="text-venge-red"
+                      />
+                    )}
+                    <StatRow
+                      label="Record"
+                      value={player.record}
+                      color="text-venge-red"
+                    />
+                    <StatRow
+                      label="Total Games"
+                      value={player.total_revenge_games.toString()}
+                      color="text-venge-red"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-4xl mb-3">⚠️</div>
+                    <div className="text-text-secondary text-lg font-medium mb-2">
+                      Not Enough Revenge Data
+                    </div>
+                    <div className="text-text-secondary text-sm opacity-75">
+                      More games needed for detailed stats
+                    </div>
+                  </div>
+                )}
               </div>
 
+              {/* Regular Games Section */}
               <div className="bg-dark-card border border-borderDefault rounded-2xl p-6 md:p-8">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
                   <div>
@@ -600,44 +565,72 @@ export default function NFLPlayerProfilePage({
               <h3 className="text-xl md:text-2xl font-bold text-center mb-6 text-venge-red">
                 Revenge Game Boost
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <DifferentialItem
-                  label={statLabels.diff1.label}
-                  value={
-                    player.differentials.differences[statLabels.diff1.key] || 0
-                  }
-                />
-                <DifferentialItem
-                  label={statLabels.diff2.label}
-                  value={
-                    player.differentials.differences[statLabels.diff2.key] || 0
-                  }
-                />
-                <DifferentialItem
-                  label={statLabels.diff3.label}
-                  value={
-                    player.differentials.differences[statLabels.diff3.key] || 0
-                  }
-                />
-                <DifferentialItem
-                  label={statLabels.diff4.label}
-                  value={
-                    player.differentials.differences[statLabels.diff4.key] || 0
-                  }
-                />
-              </div>
+
+              {hasRevengeStats ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                  <DifferentialItem
+                    label={statLabels.diff1.label}
+                    value={
+                      player.differentials.differences[statLabels.diff1.key] ||
+                      0
+                    }
+                  />
+                  <DifferentialItem
+                    label={statLabels.diff2.label}
+                    value={
+                      player.differentials.differences[statLabels.diff2.key] ||
+                      0
+                    }
+                  />
+                  <DifferentialItem
+                    label={statLabels.diff3.label}
+                    value={
+                      player.differentials.differences[statLabels.diff3.key] ||
+                      0
+                    }
+                  />
+                  <DifferentialItem
+                    label={statLabels.diff4.label}
+                    value={
+                      player.differentials.differences[statLabels.diff4.key] ||
+                      0
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-3">📊</div>
+                  <div className="text-text-secondary text-lg font-medium mb-2">
+                    Insufficient Revenge Data
+                  </div>
+                  <div className="text-text-secondary text-sm opacity-75 mb-4">
+                    Cannot calculate performance differentials without
+                    sufficient revenge game data
+                  </div>
+                  <div className="text-text-secondary text-sm">
+                    Current revenge games:{" "}
+                    <span className="text-white font-semibold">
+                      {player.total_revenge_games}
+                    </span>{" "}
+                    | Regular games:{" "}
+                    <span className="text-white font-semibold">
+                      {player.differentials.regular_stats?.games || 0}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         ) : (
-          /* Not Enough Data Section */
+          /* No Data Available */
           <div className="bg-dark-card border border-borderDefault rounded-2xl p-8 md:p-12 text-center">
             <div className="text-4xl md:text-6xl mb-4">🏈</div>
             <h3 className="text-xl md:text-2xl font-bold mb-3 text-venge-red">
-              Not Enough Revenge Data
+              No Statistical Data Available
             </h3>
             <p className="text-text-secondary text-base md:text-lg mb-4">
-              {player.name} needs more revenge games for detailed statistical
-              analysis.
+              No game data found for {player.name} since {player.departure_year}
+              .
             </p>
             <div className="text-text-secondary">
               Current revenge games:{" "}

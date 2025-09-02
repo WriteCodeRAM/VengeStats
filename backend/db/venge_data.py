@@ -218,56 +218,63 @@ def calculate_nfl_venge_score(
     elif years_since_departure <= 3:
         score += 0.5  # Still relatively recent
 
-
-    #  PERFORMANCE-BASED REVENGE FACTOR (0-3 points)
-    if revenge_games_data is not None and non_revenge_games_data is not None:
-        if len(revenge_games_data) >= 1 and len(non_revenge_games_data) >= 3:  # More lenient minimums
-            comparison = compare_nfl_stats(revenge_games_data, non_revenge_games_data, position)
-            
-            if "error" not in comparison:
-                diffs = comparison['differences']
+    # ALWAYS calculate regular stats if we have non-revenge data
+    if non_revenge_games_data is not None and len(non_revenge_games_data) >= 1:
+        # Create a comparison structure with just regular stats when revenge data is insufficient
+        if revenge_games_data is None or len(revenge_games_data) < 1:
+            # Call compare_nfl_stats with empty revenge data to get regular stats
+            import pandas as pd
+            empty_revenge_df = pd.DataFrame()
+            comparison = compare_nfl_stats(empty_revenge_df, non_revenge_games_data, position)
+        else:
+            # Existing logic for when we have both datasets
+            if len(revenge_games_data) >= 1 and len(non_revenge_games_data) >= 3:
+                comparison = compare_nfl_stats(revenge_games_data, non_revenge_games_data, position)
                 
-                # Position-specific revenge factor calculation (same weights)
-                if position == 'QB':
-                    revenge_factor = (
-                        diffs['passing_yards_diff'] * 0.01 + 
-                        diffs['passing_tds_diff'] * 0.5 +     
-                        diffs['fantasy_points_diff'] * 0.1 -   
-                        diffs['interceptions_diff'] * 0.5     
-                    )
-                elif position == 'RB':
-                    revenge_factor = (
-                        diffs['rushing_yards_diff'] * 0.015 +    
-                        diffs['rushing_tds_diff'] * 0.7 +        
-                        diffs['receiving_yards_diff'] * 0.02 +   
-                        diffs['fantasy_points_diff'] * 0.08      
-                    )
-                elif position in ['WR', 'TE']:
-                    revenge_factor = (
-                        diffs['receiving_yards_diff'] * 0.012 +  
-                        diffs['receiving_tds_diff'] * 0.8 +      
-                        diffs['receptions_diff'] * 0.2 +         
-                        diffs['fantasy_points_diff'] * 0.08      
-                    )
-                else:
-                    revenge_factor = 0
-                
-                # Expanded 0-3 point scale
-                if revenge_factor >= 4:
-                    performance_score = 3.0
-                elif revenge_factor >= 3:
-                    performance_score = 2.5
-                elif revenge_factor >= 2:
-                    performance_score = 2.0
-                elif revenge_factor >= 1:
-                    performance_score = 1.5
-                elif revenge_factor >= 0:
-                    performance_score = 0.8
-                else:
-                    performance_score = 0.0
-                
-                score += performance_score
-                print(f"Performance boost: +{performance_score:.1f} points (revenge factor: {revenge_factor:.2f})")
+                if "error" not in comparison:
+                    diffs = comparison['differences']
+                    
+                    # Position-specific revenge factor calculation (same weights)
+                    if position == 'QB':
+                        revenge_factor = (
+                            diffs['passing_yards_diff'] * 0.01 + 
+                            diffs['passing_tds_diff'] * 0.5 +     
+                            diffs['fantasy_points_diff'] * 0.1 -   
+                            diffs['interceptions_diff'] * 0.5     
+                        )
+                    elif position == 'RB':
+                        revenge_factor = (
+                            diffs['rushing_yards_diff'] * 0.015 +    
+                            diffs['rushing_tds_diff'] * 0.7 +        
+                            diffs['receiving_yards_diff'] * 0.02 +   
+                            diffs['fantasy_points_diff'] * 0.08      
+                        )
+                    elif position in ['WR', 'TE']:
+                        revenge_factor = (
+                            diffs['receiving_yards_diff'] * 0.012 +  
+                            diffs['receiving_tds_diff'] * 0.8 +      
+                            diffs['receptions_diff'] * 0.2 +         
+                            diffs['fantasy_points_diff'] * 0.08      
+                        )
+                    else:
+                        revenge_factor = 0
+                    
+                    # Expanded 0-3 point scale
+                    if revenge_factor >= 4:
+                        performance_score = 3.0
+                    elif revenge_factor >= 3:
+                        performance_score = 2.5
+                    elif revenge_factor >= 2:
+                        performance_score = 2.0
+                    elif revenge_factor >= 1:
+                        performance_score = 1.5
+                    elif revenge_factor >= 0:
+                        performance_score = 0.8
+                    else:
+                        performance_score = 0.0
+                    
+                    score += performance_score
+                    print(f"Performance boost: +{performance_score:.1f} points (revenge factor: {revenge_factor:.2f})")
 
     final_score = max(2.0, min(score, 10.0)) 
     

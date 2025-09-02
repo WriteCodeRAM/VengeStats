@@ -81,3 +81,27 @@ def get_nfl_player_db_id(nfl_data_player_id):
             result = cursor.fetchone()
             return result[0] if result else None
 
+def get_existing_player_info(nfl_data_player_id):
+    """
+    Get existing player info to check if processing needed
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT id, current_team_id, usage_tier, is_active, updated_at
+                FROM nfl_players 
+                WHERE nfl_data_py_player_id = %s
+                """,
+                (nfl_data_player_id,)
+            )
+            result = cursor.fetchone()
+            if result:
+                return {
+                    'id': result[0],
+                    'current_team_id': result[1], 
+                    'usage_tier': result[2],
+                    'is_active': result[3],
+                    'updated_at': result[4]
+                }
+            return None

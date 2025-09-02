@@ -1,6 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import redis
 import json
-import os
 from backend.schedule.nba_revenge_pipeline import get_daily_revenge_matchups
 from backend.schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
 from backend.db.venge_data import convert_numpy_to_python

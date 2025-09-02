@@ -8,7 +8,7 @@ from backend.db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name, 
 from backend.db.queries.nba.players import get_total_games_played_for_team, get_player_career_history
 import time
 from typing import List
-from backend.types.revenge_types import EnrichedNBARevengePlayer
+from backend.schemas.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()

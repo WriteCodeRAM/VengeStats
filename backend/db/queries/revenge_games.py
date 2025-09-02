@@ -1,6 +1,6 @@
 from backend.db.database import get_connection
 from typing import List, Tuple
-from backend.types.revenge_types import NFLRevengePlayer, NBARevengePlayer
+from backend.schemas.revenge_types import NFLRevengePlayer, NBARevengePlayer
 
 REVENGE_GAME_QUERY = """
 SELECT DISTINCT 

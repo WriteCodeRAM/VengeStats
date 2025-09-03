@@ -64,18 +64,16 @@ export default function NFLPlayerProfilePage({
     if (!playerId) return;
 
     const fetchPlayer = async () => {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       try {
         setLoading(true);
-        const response = await fetch(
-          `http://localhost:8000/nfl/player/${playerId}`
-        );
+        const response = await fetch(`${apiUrl}/nfl/player/${playerId}`);
 
         if (!response.ok) {
           throw new Error("Player not found");
         }
 
         const playerData = await response.json();
-        console.log(playerData);
         setPlayer(playerData);
       } catch (err) {
         console.error("Failed to fetch NFL player:", err);

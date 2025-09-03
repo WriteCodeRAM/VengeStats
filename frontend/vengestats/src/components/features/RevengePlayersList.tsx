@@ -14,15 +14,15 @@ export function RevengePlayersList() {
     const fetchPlayers = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:8000/matchups");
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const response = await fetch(`${apiUrl}/matchups`);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("API Response:", data);
-
         const nbaPlayers = data.nba_revenge_matchups || [];
         const nflPlayers = data.nfl_revenge_matchups || [];
         const sortedNBAPlayers = nbaPlayers.sort(

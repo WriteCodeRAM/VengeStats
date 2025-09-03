@@ -28,12 +28,16 @@ def get_redis_client():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "https://*.vercel.app",   
+        "https://vengestats.com", 
+        "https://www.vengestats.com", 
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 def get_from_cache(key):
     """Get data from Redis cache"""
     try:

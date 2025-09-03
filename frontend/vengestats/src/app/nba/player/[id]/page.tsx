@@ -28,17 +28,15 @@ export default function PlayerProfilePage({
     const fetchPlayer = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `http://localhost:8000/nba/player/${playerId}`
-        );
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const response = await fetch(`${apiUrl}/nba/player/${playerId}`);
 
         if (!response.ok) {
           throw new Error("Player not found");
         }
 
         const playerData = await response.json();
-        console.log("Player data:", playerData);
-        console.log("Player career timeline:", playerData.history);
         setPlayer(playerData);
       } catch (err) {
         console.error("Failed to fetch player:", err);

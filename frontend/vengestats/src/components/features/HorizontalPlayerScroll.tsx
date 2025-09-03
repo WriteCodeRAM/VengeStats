@@ -43,7 +43,6 @@ export function HorizontalPlayerScroll({
         <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
           {players.map((player) => (
             <div key={`${player.player_id}`} className="flex-shrink-0 w-80">
-              {console.log("HorizontalPlayerScroll passing player:", player)}
               <PlayerCard
                 player={{
                   name: player.name,

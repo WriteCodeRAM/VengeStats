@@ -68,7 +68,6 @@ async def test_db():
     print("Raw DB URL:", db_url)  # debug 
 
     try:
-        # psycopg2 sometimes prefers 'postgres://' instead of 'postgresql://'
         if db_url and db_url.startswith("postgresql://"):
             db_url = db_url.replace("postgresql://", "postgres://", 1)
 
@@ -84,17 +83,66 @@ async def test_db():
 
 @app.get("/matchups")
 async def matchups():
-    try:
-        # Debug database connection
-        db_url = os.getenv('DATABASE_URL')
-        print(f"DATABASE_URL exists: {db_url is not None}")
-        print(f"DATABASE_URL starts with: {db_url[:20] if db_url else 'None'}")
-        
-        nba_revenge_games = get_daily_revenge_matchups()
-        return {"status": "NBA worked", "count": len(nba_revenge_games)}
-    except Exception as e:
-        print(f"Full error: {e}")
-        return {"error": f"NBA pipeline failed: {str(e)}"}
+    cached_matchups = get_from_cache("all_matchups")
+    if cached_matchups:
+        print("Returning cached matchups")
+        return cached_matchups
+    
+    print("Generating fresh matchups...")
+    
+    # generate NBA matchups
+    nba_revenge_games = get_daily_revenge_matchups()
+    lightweight_nba_games = []
+    
+    for player in nba_revenge_games:
+        lightweight_nba_games.append({
+            "player_id": player["player_id"],
+            "name": player["name"],
+            "former_team_abbr": player["former_team_abbr"], 
+            "former_team_name": player["former_team_name"],
+            "current_team_name": player["current_team_abbr"],
+            "nba_api_id": player["nba_api_id"],
+            "venge_score": player["venge_score"],
+            "injury_status": player["injury_status"],
+            "record": player["record"],
+            "total_revenge_games": player["total_revenge_games"], 
+            "league": "nba"
+        })
+        # Cache NBA player profiles until October 21 
+        cleaned_player = convert_numpy_to_python(player)
+        set_in_cache(f"nba_player_{player['player_id']}", cleaned_player, 4233600)
+
+    # generate NFL matchups  
+    nfl_revenge_games = get_weekly_revenge_matchups()
+    lightweight_nfl_games = []
+    
+    for player in nfl_revenge_games: 
+        lightweight_nfl_games.append({ 
+            "player_id": player["player_id"],
+            "current_team_name": player["current_team_abbr"], 
+            "record": player["record"],
+            "nfl_data_id": player["nfl_data_id"],
+            "name": player["name"], 
+            "position": player["position"], 
+            "former_team_abbr": player["former_team_abbr"], 
+            "games_played": player["total_games_played_for_team"], 
+            "total_revenge_games": player["total_revenge_games"],
+            "venge_score": player["revenge_score"], 
+            "league": "nfl"
+        })
+        # Cache NFL player profiles for 1 week (604800 seconds)
+        cleaned_player = convert_numpy_to_python(player)
+        set_in_cache(f"nfl_player_{player['player_id']}", cleaned_player, 604800)
+
+    matchups_data = {
+        "nba_revenge_matchups": lightweight_nba_games,
+        "nfl_revenge_matchups": lightweight_nfl_games
+    }
+    
+    # NBA data stays static until October 21st anyways
+    set_in_cache("all_matchups", matchups_data, 604800)
+    
+    return matchups_data
 
 @app.get("/nba/player/{player_id}")
 async def get_nba_player_profile(player_id: int):

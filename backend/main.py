@@ -64,14 +64,15 @@ async def root():
 @app.get("/matchups")
 async def matchups():
     try:
-        # Test NBA pipeline
-        print("Testing NBA revenge matchups...")
-        nba_revenge_games = get_daily_revenge_matchups()
-        print(f"NBA games: {len(nba_revenge_games)}")
+        # Debug database connection
+        db_url = os.getenv('DATABASE_URL')
+        print(f"DATABASE_URL exists: {db_url is not None}")
+        print(f"DATABASE_URL starts with: {db_url[:20] if db_url else 'None'}")
         
+        nba_revenge_games = get_daily_revenge_matchups()
         return {"status": "NBA worked", "count": len(nba_revenge_games)}
     except Exception as e:
-        print(f"NBA pipeline failed: {e}")
+        print(f"Full error: {e}")
         return {"error": f"NBA pipeline failed: {str(e)}"}
 
 @app.get("/nba/player/{player_id}")

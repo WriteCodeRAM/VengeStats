@@ -1,5 +1,5 @@
-from backend.db.database import get_connection
-from backend.db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name
+from db.database import get_connection
+from db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name
 from psycopg2 import sql
 
 def find_player_by_name_globally(first_name: str, last_name: str):

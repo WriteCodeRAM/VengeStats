@@ -1,4 +1,4 @@
-from backend.db.database import get_connection 
+from db.database import get_connection 
 
 def insert_nfl_player(nfl_data_player_id, first_name, last_name, display_name, 
                      current_team_id, position, years_exp=0, usage_tier='INACTIVE', 

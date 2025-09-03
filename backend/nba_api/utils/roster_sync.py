@@ -1,14 +1,14 @@
 from typing import Set, Tuple, List, Optional
 import time
-from backend.db.queries.nba.teams import team_id_to_nba_api_id
-from backend.db.queries.nba.players import (
+from db.queries.nba.teams import team_id_to_nba_api_id
+from db.queries.nba.players import (
     find_player_by_name_globally, 
     move_player_to_team, 
     move_player_to_free_agency,
     insert_new_player,
     get_player_prev_team
 )
-from backend.db.database import get_connection
+from db.database import get_connection
 from psycopg2 import sql
 
 
@@ -198,7 +198,7 @@ def sync_team_roster(team_id: int) -> dict:
 
 def sync_all_teams():
     """Sync rosters for all teams"""
-    from backend.db.queries.nba.teams import teams
+    from db.queries.nba.teams import teams
     
     results = []
     for team_abbr, team_id in teams.items():

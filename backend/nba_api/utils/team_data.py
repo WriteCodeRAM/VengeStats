@@ -1,8 +1,8 @@
 from nba_api.stats.endpoints import CommonTeamRoster
 import time
-from backend.db.queries.nba.teams import team_id_to_nba_api_id, teams
-from backend.db.queries.nba.players import get_player_id, insert_api_player_stint
-from backend.nba_api.utils.player_utils import get_player_stints_from_nba_api
+from db.queries.nba.teams import team_id_to_nba_api_id, teams
+from db.queries.nba.players import get_player_id, insert_api_player_stint
+from nba_api.utils.player_utils import get_player_stints_from_nba_api
 
 error_log = []
 

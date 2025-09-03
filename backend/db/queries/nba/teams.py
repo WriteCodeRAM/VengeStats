@@ -1,4 +1,4 @@
-from backend.db.database import get_connection
+from db.database import get_connection
 from psycopg2 import sql
 
 teams = {

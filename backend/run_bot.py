@@ -1,5 +1,5 @@
-from backend.bot.twitter_bot import login_to_twitter, post_tweet, format_revenge_tweet
-from backend.schedule.nba_revenge_pipeline import get_daily_revenge_matchups
+from bot.twitter_bot import login_to_twitter, post_tweet, format_revenge_tweet
+from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
 from selenium import webdriver
 
 def run():

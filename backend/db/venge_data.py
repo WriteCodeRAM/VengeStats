@@ -1,7 +1,7 @@
-from backend.db.queries.nba.players import get_total_games_played, get_total_games_played_for_team
-from backend.db.queries.revenge_games import check_first_revenge_game
-from backend.db.queries.nba.teams import get_prev_team_id
-from backend.nba_api.utils.data_fetcher import compare_stats
+from db.queries.nba.players import get_total_games_played, get_total_games_played_for_team
+from db.queries.revenge_games import check_first_revenge_game
+from db.queries.nba.teams import get_prev_team_id
+from nba_api.utils.data_fetcher import compare_stats
 import numpy as np
 import pandas as pd
 
@@ -154,7 +154,7 @@ def calculate_nfl_venge_score(
     revenge_games_data=None,
     non_revenge_games_data=None
 ) -> list:
-    from backend.nfl_api.utils.player_stats import compare_nfl_stats
+    from nfl_api.utils.player_stats import compare_nfl_stats
 
     player_name = player_data['name']
     position = player_data['position']

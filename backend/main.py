@@ -5,16 +5,10 @@ import redis
 import json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
+from schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
+from db.venge_data import convert_numpy_to_python
 
-# imports that work both locally and on Railway
-try:
-    from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
-    from schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
-    from db.venge_data import convert_numpy_to_python
-except ImportError:
-    from backend.schedule.nba_revenge_pipeline import get_daily_revenge_matchups
-    from backend.schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
-    from backend.db.venge_data import convert_numpy_to_python
 app = FastAPI()
 
 # Redis connection

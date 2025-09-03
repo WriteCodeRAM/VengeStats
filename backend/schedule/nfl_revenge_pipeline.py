@@ -1,7 +1,7 @@
-from backend.db.queries.revenge_games import get_nfl_revenge_games
-from backend.db.venge_data import calculate_nfl_venge_score
-from backend.db.queries.nfl.teams import NFL_TEAM_ID_TO_ABBR
-from backend.nfl_api.utils.player_stats import get_all_nfl_player_data
+from db.queries.revenge_games import get_nfl_revenge_games
+from db.venge_data import calculate_nfl_venge_score
+from db.queries.nfl.teams import NFL_TEAM_ID_TO_ABBR
+from nfl_api.utils.player_stats import get_all_nfl_player_data
 
 def get_weekly_revenge_matchups(): 
     matchups = [

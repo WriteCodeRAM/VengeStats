@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from backend.bot.config import USERNAME, PASSWORD
+from bot.config import USERNAME, PASSWORD
 import time
 
 def format_revenge_tweet(player_info):

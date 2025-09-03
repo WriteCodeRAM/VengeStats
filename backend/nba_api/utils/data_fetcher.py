@@ -1,7 +1,7 @@
 from nba_api.stats.endpoints import PlayerGameLog
 import pandas as pd
 from datetime import datetime
-from backend.nba_api.utils.player_utils import get_seasons_from_date
+from nba_api.utils.player_utils import get_seasons_from_date
 
 def get_stats(player_id, opponent=None, after_date=None): 
     """

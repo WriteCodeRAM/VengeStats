@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from backend.db.queries.nba.teams import teams 
+from db.queries.nba.teams import teams 
 import requests
 import html
 import unicodedata

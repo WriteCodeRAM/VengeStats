@@ -1,14 +1,14 @@
-from backend.schedule.get_schedule import get_nba_schedule, get_team_ids
-from backend.db.queries.revenge_games import get_revenge_games
-from backend.scrapers.injury_scrapers import get_nba_injuries
-from backend.db.venge_data import calculate_venge_score
-from backend.nba_api.utils.data_fetcher import get_fair_comparison
-from backend.nba_api.utils.player_utils import search_player
-from backend.db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
-from backend.db.queries.nba.players import get_total_games_played_for_team, get_player_career_history
+from schedule.get_schedule import get_nba_schedule, get_team_ids
+from db.queries.revenge_games import get_revenge_games
+from scrapers.injury_scrapers import get_nba_injuries
+from db.venge_data import calculate_venge_score
+from nba_api.utils.data_fetcher import get_fair_comparison
+from nba_api.utils.player_utils import search_player
+from db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
+from db.queries.nba.players import get_total_games_played_for_team, get_player_career_history
 import time
 from typing import List
-from backend.schemas.revenge_types import EnrichedNBARevengePlayer
+from schemas.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()

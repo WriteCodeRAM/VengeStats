@@ -1,4 +1,4 @@
-from backend.db.database import get_connection
+from db.database import get_connection
 
 NFL_TEAM_ID_TO_ABBR = {
     1: 'ATL', 2: 'BUF', 3: 'CHI', 4: 'CIN', 5: 'CLE', 6: 'DAL', 7: 'DEN', 

@@ -1,5 +1,5 @@
-from backend.nfl_api.utils.player_data import get_team_roster, extract_target_players, find_nfl_data_py_player_id, process_single_player
-from backend.db.queries.nfl.teams import get_current_db_roster, move_player_to_free_agency
+from nfl_api.utils.player_data import get_team_roster, extract_target_players, find_nfl_data_py_player_id, process_single_player
+from db.queries.nfl.teams import get_current_db_roster, move_player_to_free_agency
 
 def sync_team_roster(team_id):
     """

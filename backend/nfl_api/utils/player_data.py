@@ -1,7 +1,7 @@
 import requests
 import time
 import nfl_data_py as nfl
-from backend.db.queries.nfl.players import insert_nfl_player, get_existing_player_info, insert_nfl_player_stint
+from db.queries.nfl.players import insert_nfl_player, get_existing_player_info, insert_nfl_player_stint
 
 # Target positions
 TARGET_POSITIONS = ['QB', 'RB', 'WR', 'TE']

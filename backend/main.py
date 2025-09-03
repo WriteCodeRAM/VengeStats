@@ -13,7 +13,17 @@ app = FastAPI()
 
 # Redis connection
 redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379')
-redis_client = redis.from_url(redis_url, decode_responses=True)
+redis_client = None
+
+def get_redis_client():
+    global redis_client
+    if redis_client is None:
+        try:
+            redis_client = redis.from_url(redis_url, decode_responses=True)
+        except Exception as e:
+            print(f"Redis connection failed: {e}")
+            redis_client = None
+    return redis_client
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,7 +36,10 @@ app.add_middleware(
 def get_from_cache(key):
     """Get data from Redis cache"""
     try:
-        data = redis_client.get(key)
+        client = get_redis_client()
+        if not client:
+            return None
+        data = client.get(key)
         if data:
             return json.loads(data)
         return None
@@ -37,7 +50,10 @@ def get_from_cache(key):
 def set_in_cache(key, data, expiry=3600):  
     """Set data in Redis cache with expiry"""
     try:
-        redis_client.setex(key, expiry, json.dumps(data, default=str))
+        client = get_redis_client()
+        if not client:
+            return
+        client.setex(key, expiry, json.dumps(data, default=str))
     except Exception as e:
         print(f"Redis set error: {e}")
 

@@ -1,7 +1,7 @@
 from db.queries.nba.players import get_total_games_played, get_total_games_played_for_team
 from db.queries.revenge_games import check_first_revenge_game
 from db.queries.nba.teams import get_prev_team_id
-from nba_api.utils.data_fetcher import compare_stats
+from nba_utils.utils.data_fetcher import compare_stats
 import numpy as np
 import pandas as pd
 

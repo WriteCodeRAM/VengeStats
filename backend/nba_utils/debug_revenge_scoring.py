@@ -1,5 +1,5 @@
-from nba_api.utils.player_utils import search_player
-from nba_api.utils.data_fetcher import get_fair_comparison, compare_stats
+from nba_utils.utils.player_utils import search_player
+from nba_utils.utils.data_fetcher import get_fair_comparison, compare_stats
 from db.venge_data import calculate_venge_score
 from db.queries.nba.players import get_player_id
 from db.queries.nba.teams import teams

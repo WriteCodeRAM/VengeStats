@@ -34,6 +34,7 @@ app.add_middleware(
         "https://vengestats.com",
         "https://www.vengestats.com",
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

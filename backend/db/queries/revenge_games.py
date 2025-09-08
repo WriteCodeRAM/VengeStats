@@ -1,6 +1,7 @@
 from db.database import get_connection
 from typing import List, Tuple
 from schemas.revenge_types import NFLRevengePlayer, NBARevengePlayer
+from db.queries.nfl.teams import NFL_TEAM_ID_TO_ABBR 
 
 REVENGE_GAME_QUERY = """
 SELECT DISTINCT 
@@ -63,7 +64,36 @@ GROUP BY p.id, p.nfl_data_py_player_id, p.first_name, p.last_name, p.display_nam
          p.all_pro_selections, former_team.team_name, former_team.team_abbreviation, former_team.id,
          curr_team.team_name, curr_team.team_abbreviation;
 """
+
+def get_nfl_player_stint_history(player_id: int) -> List[List[int]]:
+    """
+    Fetches all stints for a given player from nfl_player_stints table.
     
+    Args:
+        player_id: The ID of the player to fetch stints for
+        
+    Returns:
+        List of stints in format [[team_id, season_start, season_end], ...]
+    """
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            query = """
+                SELECT team_id, season_start, season_end
+                FROM nfl_player_stints 
+                WHERE player_id = %s
+                ORDER BY season_start ASC, season_end ASC
+            """
+            cursor.execute(query, (player_id,))
+            stints = cursor.fetchall()
+            
+
+
+            stints = [list(stint) for stint in stints]
+            for stint in stints:
+                stint[0] = NFL_TEAM_ID_TO_ABBR[int(stint[0])]
+            return stints
+
+
 def get_nfl_revenge_games(schedule: List[List[int]]) -> List[NFLRevengePlayer]:
     with get_connection() as conn: 
         with conn.cursor() as cursor:
@@ -79,6 +109,7 @@ def get_nfl_revenge_games(schedule: List[List[int]]) -> List[NFLRevengePlayer]:
                     departure_year = player[18]    # departure_year
                     nfl_data_id = player[1]       # nfl_data_id
                     
+                    team_history = get_nfl_player_stint_history(player[0])
                     revenge_games.append({
                         'player_id': player[0],
                         'name': f"{player[2]} {player[3]}",
@@ -100,6 +131,7 @@ def get_nfl_revenge_games(schedule: List[List[int]]) -> List[NFLRevengePlayer]:
                         'departure_year': departure_year,
                         'total_games_played_for_team': player[19],
                         'injury_status': 'Healthy',
+                        'history': team_history,
                         'league': 'NFL'
                     })
                     
@@ -144,3 +176,5 @@ def insert_first_revenge_game(player_id: int, team_id: int):
             query = "INSERT INTO nba_first_revenge_games (player_id, team_id) VALUES (%s, %s)"
             cursor.execute(query, (player_id, team_id))
             conn.commit()
+
+print(get_nfl_player_stint_history(138))

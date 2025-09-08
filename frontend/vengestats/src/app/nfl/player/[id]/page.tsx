@@ -280,36 +280,68 @@ export default function NFLPlayerProfilePage({
                 <div className="text-text-secondary text-sm font-semibold mb-3">
                   CAREER TIMELINE
                 </div>
-                <div className="flex items-center gap-4 justify-center">
-                  {/* Draft Team */}
-                  {player.draft_team && (
+
+                {/* Desktop Timeline */}
+                <div className="flex items-center gap-3 justify-center overflow-x-auto">
+                  {player.history && player.history.length > 0 ? (
+                    player.history.map((stint, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div
+                          className={`px-4 py-3 rounded-xl text-center min-w-20 ${
+                            index === 0
+                              ? "bg-purple-600" // First team (draft team)
+                              : index === player.history.length - 1
+                              ? "bg-blue-600" // Current team
+                              : "bg-gray-600" // Former teams
+                          }`}
+                        >
+                          <div className="font-semibold">{stint[0]}</div>
+                          <div className="text-xs text-gray-300">
+                            {stint[1]}
+                            {stint[2] && stint[2] !== stint[1]
+                              ? `-${stint[2]}`
+                              : ""}
+                          </div>
+                          <div className="text-xs text-gray-300">
+                            {stint.games_played}
+                          </div>
+                        </div>
+                        {index < player.history.length - 1 && (
+                          <div className="text-text-secondary">→</div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    // Fallback to original timeline if no history data
                     <>
-                      <div className="bg-purple-600 px-4 py-3 rounded-xl text-center min-w-20">
-                        <div className="font-semibold">{player.draft_team}</div>
-                        <div className="text-xs text-gray-300">Drafted</div>
+                      {player.draft_team && (
+                        <>
+                          <div className="bg-purple-600 px-4 py-3 rounded-xl text-center min-w-20">
+                            <div className="font-semibold">
+                              {player.draft_team}
+                            </div>
+                            <div className="text-xs text-gray-300">Drafted</div>
+                          </div>
+                          <div className="text-text-secondary">→</div>
+                        </>
+                      )}
+                      <div className="bg-gray-600 px-4 py-3 rounded-xl text-center min-w-20">
+                        <div className="font-semibold">
+                          {player.former_team_abbr}
+                        </div>
+                        <div className="text-xs text-gray-300">
+                          {player.season_start}-{player.departure_year}
+                        </div>
                       </div>
                       <div className="text-text-secondary">→</div>
+                      <div className="bg-blue-600 px-4 py-3 rounded-xl text-center min-w-20">
+                        <div className="font-semibold">
+                          {player.current_team_abbr}
+                        </div>
+                        <div className="text-xs text-gray-300">Current</div>
+                      </div>
                     </>
                   )}
-
-                  {/* Former Team */}
-                  <div className="bg-gray-600 px-4 py-3 rounded-xl text-center min-w-20">
-                    <div className="font-semibold">
-                      {player.former_team_abbr}
-                    </div>
-                    <div className="text-xs text-gray-300">
-                      {player.season_start}-{player.departure_year}
-                    </div>
-                  </div>
-                  <div className="text-text-secondary">→</div>
-
-                  {/* Current Team */}
-                  <div className="bg-blue-600 px-4 py-3 rounded-xl text-center min-w-20">
-                    <div className="font-semibold">
-                      {player.current_team_abbr}
-                    </div>
-                    <div className="text-xs text-gray-300">Current</div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -371,19 +403,54 @@ export default function NFLPlayerProfilePage({
 
             {/* Bottom: Simplified Timeline */}
             <div className="flex items-center gap-3 justify-center">
-              <div className="bg-gray-600 px-3 py-2 rounded-lg text-center min-w-16">
-                <div className="font-semibold text-sm">
-                  {player.former_team_abbr}
-                </div>
-                <div className="text-xs text-gray-300">Former</div>
-              </div>
-              <div className="text-text-secondary text-sm">→</div>
-              <div className="bg-blue-600 px-3 py-2 rounded-lg text-center min-w-16">
-                <div className="font-semibold text-sm">
-                  {player.current_team_abbr}
-                </div>
-                <div className="text-xs text-gray-300">Current</div>
-              </div>
+              {player.history && player.history.length > 0 ? (
+                <>
+                  <div
+                    className={`px-3 py-2 rounded-lg text-center min-w-16 ${
+                      player.history.length === 1
+                        ? "bg-blue-600"
+                        : "bg-gray-600"
+                    }`}
+                  >
+                    <div className="font-semibold text-sm">
+                      {player.history.length > 1
+                        ? player.former_team_abbr
+                        : player.history[0].team_abbr}
+                    </div>
+                    <div className="text-xs text-gray-300">
+                      {player.history.length > 1 ? "Former" : "Current"}
+                    </div>
+                  </div>
+                  {player.history.length > 1 && (
+                    <>
+                      <div className="text-text-secondary text-sm">→</div>
+                      <div className="bg-blue-600 px-3 py-2 rounded-lg text-center min-w-16">
+                        <div className="font-semibold text-sm">
+                          {player.current_team_abbr}
+                        </div>
+                        <div className="text-xs text-gray-300">Current</div>
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                // Original fallback
+                <>
+                  <div className="bg-gray-600 px-3 py-2 rounded-lg text-center min-w-16">
+                    <div className="font-semibold text-sm">
+                      {player.former_team_abbr}
+                    </div>
+                    <div className="text-xs text-gray-300">Former</div>
+                  </div>
+                  <div className="text-text-secondary text-sm">→</div>
+                  <div className="bg-blue-600 px-3 py-2 rounded-lg text-center min-w-16">
+                    <div className="font-semibold text-sm">
+                      {player.current_team_abbr}
+                    </div>
+                    <div className="text-xs text-gray-300">Current</div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

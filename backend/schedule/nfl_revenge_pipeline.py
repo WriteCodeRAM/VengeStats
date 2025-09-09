@@ -5,23 +5,23 @@ from nfl_api.utils.player_stats import get_all_nfl_player_data
 
 def get_weekly_revenge_matchups(): 
     matchups = [
-    ["6", "21"],    # Dallas Cowboys at Philadelphia Eagles (Thursday)
-    ["12", "24"],   # Kansas City Chiefs at Los Angeles Chargers (Friday, Brazil)
-    ["19", "28"],   # New York Giants at Washington Commanders (Sunday)
-    ["23", "20"],   # Pittsburgh Steelers at New York Jets (Sunday)
-    ["15", "11"],   # Miami Dolphins at Indianapolis Colts (Sunday)
-    ["22", "18"],   # Arizona Cardinals at New Orleans Saints (Sunday)
-    ["29", "30"],   # Carolina Panthers at Jacksonville Jaguars (Sunday)
-    ["13", "17"],   # Las Vegas Raiders at New England Patriots (Sunday)
-    ["27", "1"],    # Tampa Bay Buccaneers at Atlanta Falcons (Sunday)
-    ["4", "5"],     # Cincinnati Bengals at Cleveland Browns (Sunday)
-    ["25", "26"],   # San Francisco 49ers at Seattle Seahawks (Sunday)
-    ["10", "7"],    # Tennessee Titans at Denver Broncos (Sunday)
-    ["14", "34"],   # Los Angeles Rams at Houston Texans (Sunday)
-    ["9", "8"],     # Green Bay Packers at Detroit Lions (Sunday)
-    ["33", "2"],    # Baltimore Ravens at Buffalo Bills (Sunday Night)
-    ["16", "3"]     # Minnesota Vikings at Chicago Bears (Monday Night)
-]
+        ["9", "28"],   # Packers at Commanders (Thursday)
+        ["5", "33"],   # Browns at Ravens
+        ["30", "4"],   # Jaguars at Bengals
+        ["19", "6"],   # Giants at Cowboys
+        ["3", "8"],    # Bears at Lions
+        ["17", "15"],  # Patriots at Dolphins
+        ["25", "18"],  # 49ers at Saints
+        ["2", "20"],   # Bills at Jets
+        ["26", "23"],  # Seahawks at Steelers
+        ["14", "10"],  # Rams at Titans
+        ["29", "22"],  # Panthers at Cardinals
+        ["7", "11"],   # Broncos at Colts
+        ["21", "12"],  # Eagles at Chiefs
+        ["1", "16"],   # Falcons at Vikings
+        ["27", "34"],  # Buccaneers at Texans (Monday 7PM)
+        ["24", "13"]   # Chargers at Raiders (Monday 10PM)
+    ]
 
     revenge_players = get_nfl_revenge_games(matchups)
     

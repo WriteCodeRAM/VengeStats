@@ -176,5 +176,3 @@ def insert_first_revenge_game(player_id: int, team_id: int):
             query = "INSERT INTO nba_first_revenge_games (player_id, team_id) VALUES (%s, %s)"
             cursor.execute(query, (player_id, team_id))
             conn.commit()
-
-print(get_nfl_player_stint_history(138))

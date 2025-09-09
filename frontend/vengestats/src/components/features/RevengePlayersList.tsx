@@ -71,7 +71,7 @@ export function RevengePlayersList() {
       {/* NFL Section */}
       <HorizontalPlayerScroll
         title="NFL Revenge Games 🏈"
-        subtitle={`${nflPlayers.length} players seeking vengeance in week 1`}
+        subtitle={`${nflPlayers.length} players seeking vengeance in week 2`}
         players={nflPlayers}
       />
       {/* NBA Section */}

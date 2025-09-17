@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from backend.schemas.revenge_types import NBARevengeGame
+from schemas.revenge_types import NBARevengeGame
 from typing import List
 
 def get_nba_injuries(revenge_games: List[NBARevengeGame]):

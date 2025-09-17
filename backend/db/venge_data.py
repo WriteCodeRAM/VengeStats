@@ -16,18 +16,18 @@ all_stars = {
 
 # Players with strong revenge narratives (long tenure, messy exits, emotional returns)
 notable_revenge_narratives = {
-    "Kevin Durant": [10, 21],           # GSW, OKC
-    "Kyrie Irving": [2],                # BOS
-    "LeBron James": [6, 16],            # CLE, MIA
-    "Jimmy Butler": [18, 23, 16],       # MIN, PHI, MIA
-    "Paul George": [12],                # IND
-    "Chris Paul": [11, 13],             # HOU, LAC
-    "James Harden": [11, 23],           # HOU, PHI
-    "Ben Simmons": [23],                # PHI
-    "Russell Westbrook": [21, 14],      # OKC, LAL
-    "Jrue Holiday": [17],               # MIL
-    "Marcus Smart": [2],                # BOS
-    "Luka Dončić": [7]                  # DAL
+    "Kevin Durant": {10, 21},           # GSW, OKC
+    "Kyrie Irving": {2},                # BOS
+    "LeBron James": {6, 16},            # CLE, MIA
+    "Jimmy Butler": {18, 23, 16},       # MIN, PHI, MIA
+    "Paul George": {12},                # IND
+    "Chris Paul": {11, 13},             # HOU, LAC
+    "James Harden": {11, 23},           # HOU, PHI
+    "Ben Simmons": {23},                # PHI
+    "Russell Westbrook": {21, 14},      # OKC, LAL
+    "Jrue Holiday": {17},               # MIL
+    "Marcus Smart": {2},                # BOS
+    "Luka Dončić": {7}                  # DAL
 }
 
 def convert_numpy_to_python(obj):
@@ -73,7 +73,7 @@ def calculate_nba_venge_score(
     is_first_time = check_first_revenge_game(player_id, opponent_team_id)
     comparison = None
     
-    score = 0
+    score = 1
     
     if total_games > 0:
         tenure_ratio = games_with_opponent / total_games  # 0.0 to 1.0

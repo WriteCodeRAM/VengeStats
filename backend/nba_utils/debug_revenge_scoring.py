@@ -1,6 +1,6 @@
 from nba_utils.utils.player_utils import search_player
 from nba_utils.utils.data_fetcher import get_fair_comparison, compare_stats
-from db.venge_data import calculate_venge_score
+from db.venge_data import calculate_nba_venge_score
 from db.queries.nba.players import get_player_id
 from db.queries.nba.teams import teams
 import time
@@ -119,7 +119,7 @@ def test_player_revenge_scoring(player_name: str, former_team_abbr: str, departu
     
     # Calculate the full venge score with performance component
     try:
-        final_score = calculate_venge_score(
+        final_score = calculate_nba_venge_score(
         player_id=db_player_id,
         player_name=player_name,
         opponent_team_id=former_team_id,

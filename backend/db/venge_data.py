@@ -49,12 +49,13 @@ def convert_numpy_to_python(obj):
     else:
         return obj
 
-def calculate_venge_score(
+def calculate_nba_venge_score(
     player_id: int,
     player_name: str,
     opponent_team_id: int,
     revenge_games_data=None,
-    non_revenge_games_data=None
+    non_revenge_games_data=None, 
+    departure_method=None
 ) -> float:
     """
     Calculate comprehensive venge score from 1-10
@@ -65,14 +66,12 @@ def calculate_venge_score(
         opponent_team_id: Internal opponent team ID  
         nba_api_player_id: NBA API player ID (for stats lookup)
         opponent_team_abbr: Team abbreviation for NBA API
-        departure_date: When player left the team (YYYY-MM-DD)
+        departure_method: (Traded, Waived, Free Agency)
     """
     total_games = get_total_games_played(player_id)
     games_with_opponent = get_total_games_played_for_team(player_id, opponent_team_id)
     is_first_time = check_first_revenge_game(player_id, opponent_team_id)
     comparison = None
-
-    print(f"{player_name}: total games = {total_games}, games played for opps = {games_with_opponent}")
     
     score = 0
     
@@ -94,14 +93,14 @@ def calculate_venge_score(
         
         score += tenure_score
 
-    # 2. FORMER TEAM BONUS (2.5 points) 
+    # 2. FORMER TEAM BONUS (1.5 points) 
     last_team_id = get_prev_team_id(player_id)
     if last_team_id == opponent_team_id:
-        score += 2.5
-
-    # 3. FIRST-TIME REVENGE (1.5 points)
-    if is_first_time:
         score += 1.5
+
+    # 3. FIRST-TIME REVENGE (1 point)
+    if is_first_time:
+        score += 1
 
     # 4. ALL-STAR STATUS (1 point)
     if player_name in all_stars:
@@ -143,7 +142,13 @@ def calculate_venge_score(
                 print(f"Performance boost: +{performance_score:.1f} points")
     else: 
         print("error: need to recall nba_api")
-
+    #7 DEPARTURE METHOD
+    if departure_method in ['RELEASED', 'WAIVED', 'TRADED']: 
+        score += 1
+    elif departure_method == 'F/A': 
+        score += 0.5
+    else: 
+        score += 0.2
     # ensure minimum score of 1 and cap at 10
     final_score = max(1.0, min(score, 10.0))
     # return score and differentials
@@ -164,12 +169,18 @@ def calculate_nfl_venge_score(
     draft_team = player_data['draft_team']
     opponent_team_id = player_data['opponent_team_id']
     total_games_played_for_team = player_data['total_games_played_for_team']
-    years_exp = player_data['years_exp'] or 0
     most_recent_departure = player_data['departure_year'] or 0
+    departure_method = player_data['departure_method']
     
-    print(f"{player_name} ({position}): {total_games_played_for_team} games with former team")
-    
-    score = 1.5  
+    score = 0
+    if departure_method in ['RELEASED', 'WAIVED', 'TRADED']: 
+        score += 1
+        print(f'{player_name} was {departure_method}. Adding 1 point')
+    elif departure_method == 'F/A': 
+        score += 0.5
+    else: 
+        print('No departure method adding .2 points')
+        score += 0.2
     comparison = None
 
     # 1. TENURE IMPACT (0-3.5 points) 
@@ -279,37 +290,3 @@ def calculate_nfl_venge_score(
     final_score = max(2.0, min(score, 10.0)) 
     
     return [round(final_score, 1), comparison]
-
-def get_venge_score_breakdown(
-    player_id: int,
-    player_name: str, 
-    opponent_team_id: int,
-    nba_api_player_id: int = None,
-    opponent_team_abbr: str = None,
-    departure_date: str = None
-) -> dict:
-    """
-    Get detailed breakdown of venge score components
-    """
-    total_games = get_total_games_played(player_id)
-    games_with_opponent = get_total_games_played_for_team(player_id, opponent_team_id)
-    is_first_time = check_first_revenge_game(player_id, opponent_team_id)
-    
-    breakdown = {
-        "tenure_score": 0,
-        "former_team_bonus": 0,
-        "first_time_bonus": 0,
-        "all_star_bonus": 0,
-        "narrative_bonus": 0,
-        "performance_bonus": 0,
-        "total_score": 0
-    }
-    
-    
-    final_score = calculate_venge_score(
-        player_id, player_name, opponent_team_id,
-        nba_api_player_id, opponent_team_abbr, departure_date
-    )
-    
-    breakdown["total_score"] = final_score
-    return breakdown

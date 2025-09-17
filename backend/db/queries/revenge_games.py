@@ -3,7 +3,7 @@ from typing import List, Tuple
 from schemas.revenge_types import NFLRevengePlayer, NBARevengePlayer
 from db.queries.nfl.teams import NFL_TEAM_ID_TO_ABBR 
 
-REVENGE_GAME_QUERY = """
+NBA_REVENGE_GAME_QUERY = """
 SELECT DISTINCT 
     p.id AS player_id, 
     p.first_name, 
@@ -11,20 +11,33 @@ SELECT DISTINCT
     curr_team.name AS current_team_name,  
     former_team.name AS former_team_name,
     former_team.id AS opponent_team_id,
-    MAX(pts.last_game_date) AS most_recent_departure
+    pts.last_game_date AS most_recent_departure,
+    pts.departure_method
 FROM nba_players p
-JOIN nba_player_team_history pth ON p.id = pth.player_id
 JOIN teams curr_team ON p.current_team_id = curr_team.id
-JOIN teams former_team ON pth.team_id = former_team.id
-JOIN nba_player_team_stints pts ON p.id = pts.player_id AND former_team.id = pts.team_id
+JOIN (
+    SELECT DISTINCT ON (player_id, team_id)
+        player_id,
+        team_id,
+        last_game_date,
+        departure_method
+    FROM nba_player_team_stints_api
+    ORDER BY player_id, team_id, last_game_date DESC
+) pts ON p.id = pts.player_id AND pts.team_id != p.current_team_id
+JOIN teams former_team ON pts.team_id = former_team.id
 WHERE 
-    (p.current_team_id = %s AND pth.team_id = %s)
+    (p.current_team_id = %s AND pts.team_id = %s)
     OR 
-    (p.current_team_id = %s AND pth.team_id = %s)
-GROUP BY p.id, p.first_name, p.last_name, curr_team.name, former_team.name, former_team.id;
+    (p.current_team_id = %s AND pts.team_id = %s);
 """
 
-NFL_REVENGE_GAME_QUERY = """
+NFL_REVENGE_GAME_QUERY =NFL_REVENGE_GAME_QUERY = """
+WITH recent_stints AS (
+    SELECT 
+        pts.*,
+        ROW_NUMBER() OVER (PARTITION BY pts.player_id, pts.team_id ORDER BY pts.season_end DESC) as rn
+    FROM nfl_player_stints pts
+)
 SELECT DISTINCT 
     p.id AS player_id, 
     p.nfl_data_py_player_id as nfl_id,
@@ -45,9 +58,10 @@ SELECT DISTINCT
     curr_team.team_abbreviation AS current_team_abbr,
     MAX(pts.season_start) AS season_start,
     MAX(pts.season_end) AS most_recent_departure_season,
-    SUM(pts.games_played) AS total_games_played_for_team
+    SUM(pts.games_played) AS total_games_played_for_team,
+    MAX(CASE WHEN pts.rn = 1 THEN pts.departure_method END) AS departure_method
 FROM nfl_players p
-JOIN nfl_player_stints pts ON p.id = pts.player_id
+JOIN recent_stints pts ON p.id = pts.player_id
 JOIN nfl_teams former_team ON pts.team_id = former_team.id
 JOIN nfl_teams curr_team ON p.current_team_id = curr_team.id
 WHERE 
@@ -129,6 +143,7 @@ def get_nfl_revenge_games(schedule: List[List[int]]) -> List[NFLRevengePlayer]:
                         'current_team_abbr': player[16],
                         'season_start': player[17],
                         'departure_year': departure_year,
+                        'departure_method': player[20],
                         'total_games_played_for_team': player[19],
                         'injury_status': 'Healthy',
                         'history': team_history,
@@ -137,13 +152,12 @@ def get_nfl_revenge_games(schedule: List[List[int]]) -> List[NFLRevengePlayer]:
                     
             return revenge_games
 
-
-def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengePlayer]:
+def get_nba_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengePlayer]:
     with get_connection() as conn: 
         with conn.cursor() as cursor:
             revenge_games = []
             for away_team, home_team in schedule:  
-                cursor.execute(REVENGE_GAME_QUERY, (away_team, home_team, home_team, away_team))
+                cursor.execute(NBA_REVENGE_GAME_QUERY, (away_team, home_team, home_team, away_team))
                 players = cursor.fetchall()  
                 for player in players:
                     revenge_games.append([
@@ -153,10 +167,10 @@ def get_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengePlayer]
                         player[0],                   # Player ID
                         player[5],                   # Opponent team ID
                         None,                        # revenge_score placeholder
-                        player[6]                    # departure date (most recent stint)
+                        player[6],                   # departure date (most recent stint)
+                        player[7]                    # departure method
                     ])
             return revenge_games
-
 
 def check_first_revenge_game(player_id: int, team_id: int) -> bool:
     """Checks if a player's first revenge game against a team is recorded."""

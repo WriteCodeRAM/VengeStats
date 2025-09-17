@@ -1,6 +1,5 @@
 import sys
 import os
-import psycopg2
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import redis
 import json
@@ -63,29 +62,6 @@ def set_in_cache(key, data, expiry=3600):
         client.setex(key, expiry, json.dumps(data, default=str))
     except Exception as e:
         print(f"Redis set error: {e}")
-
-@app.get("/")
-async def root():
-    return {"message": "Yo"}
-
-@app.get("/test-db")
-async def test_db():
-    db_url = os.getenv("DATABASE_URL")
-    print("Raw DB URL:", db_url)  # debug 
-
-    try:
-        if db_url and db_url.startswith("postgresql://"):
-            db_url = db_url.replace("postgresql://", "postgres://", 1)
-
-        conn = psycopg2.connect(db_url)
-        with conn.cursor() as cur:
-            cur.execute("SELECT NOW();")  
-            ts = cur.fetchone()
-        conn.close()
-
-        return {"db_status": "connected", "time": str(ts[0])}
-    except Exception as e:
-        return {"db_status": "failed", "error": str(e)}
 
 @app.get("/matchups")
 async def matchups():
@@ -168,7 +144,6 @@ async def get_nfl_player_profile(player_id: int):
 
 @app.get("/cache/clear")
 async def clear_cache():
-    """Clear all cache - useful for development"""
     try:
         client = get_redis_client()
         if client:

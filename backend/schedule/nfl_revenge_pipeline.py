@@ -5,7 +5,7 @@ from nfl_api.utils.player_stats import get_all_nfl_player_data
 
 def get_weekly_revenge_matchups(): 
     matchups = [
-        ["9", "28"],   # Packers at Commanders (Thursday)
+        ["9", "28"],   # Packers at Commanderså
         ["5", "33"],   # Browns at Ravens
         ["30", "4"],   # Jaguars at Bengals
         ["19", "6"],   # Giants at Cowboys
@@ -19,8 +19,8 @@ def get_weekly_revenge_matchups():
         ["7", "11"],   # Broncos at Colts
         ["21", "12"],  # Eagles at Chiefs
         ["1", "16"],   # Falcons at Vikings
-        ["27", "34"],  # Buccaneers at Texans (Monday 7PM)
-        ["24", "13"]   # Chargers at Raiders (Monday 10PM)
+        ["27", "34"],  # Buccaneers at Texans
+        ["24", "13"]   # Chargers at Raiders
     ]
 
     revenge_players = get_nfl_revenge_games(matchups)

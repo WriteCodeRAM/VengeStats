@@ -1,19 +1,22 @@
 from schedule.get_schedule import get_nba_schedule, get_team_ids
-from db.queries.revenge_games import get_revenge_games
-from scrapers.injury_scrapers import get_nba_injuries
-from db.venge_data import calculate_venge_score
+from backend.db.queries.revenge_games import get_nba_revenge_games
+from backend.scrapers.injury_scrapers import get_nba_injuries
+from db.venge_data import calculate_nba_venge_score
 from nba_utils.utils.data_fetcher import get_fair_comparison
-from nba_utils.utils.player_utils import search_player
-from db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
-from db.queries.nba.players import get_total_games_played_for_team, get_player_career_history
+from backend.nba_utils.utils.player_utils import search_player
+from backend.db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
+from backend.db.queries.nba.players import get_total_games_played_for_team, get_player_career_history
 import time
 from typing import List
-from schemas.revenge_types import EnrichedNBARevengePlayer
+from backend.schemas.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()
-    revenge_games = get_revenge_games([[11,21], [10,14]]) 
+    revenge_games = get_nba_revenge_games([[11,21]]) 
+
     updated_games = get_nba_injuries(revenge_games)
+
+    print(updated_games)
     
     enriched_games = []
     
@@ -25,6 +28,7 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     for player in updated_games:
         if player[2] == "Out":  # Skip injured players
             continue
+
         
         time.sleep(5)
         current_team_id = get_current_team_id(player[3])
@@ -35,7 +39,7 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
         current_team_abrev = team_id_to_abbr[current_team_id]
         
         revenge_data, nonrevenge_data = get_fair_comparison(nba_api_id, former_team_abbr, player[6])
-        revenge_score, differentials = calculate_venge_score(player[3], player[0], player[4], revenge_data, nonrevenge_data)
+        revenge_score, differentials = calculate_nba_venge_score(player[3], player[0], player[4], revenge_data, nonrevenge_data, player[7])
         
         # print(differentials)
 
@@ -80,3 +84,5 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
         enriched_games.append(enriched_player)
     
     return enriched_games
+
+get_daily_revenge_matchups()

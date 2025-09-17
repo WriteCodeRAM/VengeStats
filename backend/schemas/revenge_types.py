@@ -20,6 +20,7 @@ class NFLRevengePlayer(TypedDict):
     current_team_abbr: str  
     season_start: int
     departure_year: int
+    departure_method: str
     total_games_played_for_team: int
     
     # PlayerCard interface fields

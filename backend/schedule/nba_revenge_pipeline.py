@@ -12,7 +12,7 @@ from schemas.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()
-    revenge_games = get_nba_revenge_games([[11,21]]) 
+    revenge_games = get_nba_revenge_games([[11,21], [14,10]]) 
 
     updated_games = get_nba_injuries(revenge_games)
 

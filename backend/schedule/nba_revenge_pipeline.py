@@ -15,8 +15,6 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     revenge_games = get_nba_revenge_games([[11,21], [14,10]]) 
 
     updated_games = get_nba_injuries(revenge_games)
-
-    print(updated_games)
     
     enriched_games = []
     
@@ -50,6 +48,8 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
         losses = len(revenge_data[revenge_data['WL'] == 'L']) if not revenge_data.empty else 0
         total_revenge_games = len(revenge_data) if not revenge_data.empty else 0
         total_games_played_for_opp = get_total_games_played_for_team(player[3], player[4])
+        # print(f'{player[0]} record is {wins}-{losses}')
+        # print(differentials)
         
         # Get departure year
         departure_year = player[6].year if player[6] else None

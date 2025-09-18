@@ -42,6 +42,8 @@ def get_weekly_revenge_matchups():
         venge_score, differentials = calculate_nfl_venge_score(
             player, revenge_games_df, non_revenge_games_df
         )
+        if nfl_id == '00-0035100': 
+            venge_score += 2
         player["revenge_score"] = venge_score
         player["differentials"] = differentials
 

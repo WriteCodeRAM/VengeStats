@@ -4,7 +4,10 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata = {
   title: "VengeStats - NBA & NFL Revenge Games",
-  description: "Track revenge games when players face their former teams",
+  description:
+    "Discover when players face their former teams with detailed revenge game analytics, performance stats, and vengeance scores. Track NFL and NBA players seeking redemption against old squads.",
+  keywords:
+    "revenge games, NFL stats, NBA analytics, former team matchups, player performance, sports statistics",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "48x48" },
@@ -14,7 +17,6 @@ export const metadata = {
     apple: "/apple-touch-icon.png",
   },
 };
-
 export default function RootLayout({
   children,
 }: {

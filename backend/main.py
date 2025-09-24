@@ -107,6 +107,7 @@ async def matchups():
             "name": player["name"], 
             "position": player["position"], 
             "former_team_abbr": player["former_team_abbr"], 
+            "former_team_name": player["former_team_name"],
             "games_played": player["total_games_played_for_team"], 
             "total_revenge_games": player["total_revenge_games"],
             "venge_score": player["revenge_score"], 
@@ -142,8 +143,13 @@ async def get_nfl_player_profile(player_id: int):
         
     raise HTTPException(status_code=404, detail="Player not found")
 
-@app.get("/cache/clear")
-async def clear_cache():
+@app.get("/cache/clear/{cache_key}")
+async def clear_cache(cache_key: str):
+    expected_key = os.getenv('CACHE_KEY')
+    
+    if not expected_key or cache_key != expected_key:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
     try:
         client = get_redis_client()
         if client:

@@ -122,7 +122,6 @@ def get_nfl_revenge_games(schedule: List[List[int]]) -> List[NFLRevengePlayer]:
                     former_team_abbr = player[13]  # former_team_abbr from query
                     departure_year = player[18]    # departure_year
                     nfl_data_id = player[1]       # nfl_data_id
-                    
                     team_history = get_nfl_player_stint_history(player[0])
                     revenge_games.append({
                         'player_id': player[0],

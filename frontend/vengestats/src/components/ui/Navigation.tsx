@@ -127,7 +127,7 @@ export function Navigation() {
 
           <div className="w-full">
             <Input
-              placeholder="Search players, teams..."
+              placeholder="Search players/teams, coming soon"
               className="bg-dark-card border-borderDefault text-white placeholder:text-text-secondary focus:border-venge-red w-full"
             />
           </div>

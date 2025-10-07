@@ -286,6 +286,7 @@ def calculate_nfl_venge_score(
                     
                     score += performance_score
                     print(f"Performance boost: +{performance_score:.1f} points (revenge factor: {revenge_factor:.2f})")
+    if usage_tier == 'BACKUP' and position == 'QB': score -= 2
 
     final_score = max(2.0, min(score, 10.0)) 
     

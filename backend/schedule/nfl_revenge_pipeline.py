@@ -6,20 +6,20 @@ from nfl_api.utils.player_stats import get_all_nfl_player_data
 def get_weekly_revenge_matchups(): 
 
     matchups = [
-        ["25", "14"],  # 49ers at Rams (Thursday)
-        ["16", "5"],   # Vikings at Browns (Sunday 9:30 AM)
-        ["34", "33"],  # Texans at Ravens
-        ["15", "29"],  # Dolphins at Panthers
-        ["13", "11"],  # Raiders at Colts
-        ["19", "18"],  # Giants at Saints
-        ["6", "20"],   # Cowboys at Jets
-        ["7", "21"],   # Broncos at Eagles
-        ["10", "22"],  # Titans at Cardinals
-        ["27", "26"],  # Buccaneers at Seahawks
-        ["8", "4"],    # Lions at Bengals
-        ["28", "24"],  # Commanders at Chargers
-        ["17", "2"],   # Patriots at Bills (Sunday Night)
-        ["12", "30"]   # Chiefs at Jaguars (Monday Night)
+        ["19", "21"],  # Giants at Eagles (Thursday)
+        ["20", "7"],   # Jets at Broncos (London Game, Sunday 9:30 AM)
+        ["33", "14"],  # Ravens at Rams
+        ["29", "6"],   # Panthers at Cowboys
+        ["22", "11"],  # Cardinals at Colts
+        ["26", "30"],  # Seahawks at Jaguars
+        ["15", "24"],  # Dolphins at Chargers
+        ["5", "23"],   # Browns at Steelers
+        ["18", "17"],  # Saints at Patriots
+        ["10", "13"],  # Titans at Raiders (4:05 PM)
+        ["25", "27"],  # 49ers at Buccaneers (4:25 PM)
+        ["4", "9"],    # Bengals at Packers (4:25 PM)
+        ["8", "12"],   # Lions at Chiefs (Sunday Night)
+        ["2", "1"]     # Bills at Falcons (Monday Night)
     ]
 
     revenge_players = get_nfl_revenge_games(matchups)
@@ -40,8 +40,7 @@ def get_weekly_revenge_matchups():
         venge_score, differentials = calculate_nfl_venge_score(
             player, revenge_games_df, non_revenge_games_df
         )
-        if nfl_id == '00-0035100': 
-            venge_score += 2
+        
         player["revenge_score"] = venge_score
         player["differentials"] = differentials
 

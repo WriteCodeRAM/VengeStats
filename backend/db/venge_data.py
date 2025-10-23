@@ -143,7 +143,7 @@ def calculate_nba_venge_score(
     else: 
         print("error: need to recall nba_api")
     #7 DEPARTURE METHOD
-    if departure_method in ['RELEASED', 'WAIVED', 'TRADED']: 
+    if departure_method in ['RELEASED', 'WAIVED', 'TRADED', 'TRADE']: 
         score += 1
     elif departure_method == 'F/A': 
         score += 0.5
@@ -173,7 +173,7 @@ def calculate_nfl_venge_score(
     departure_method = player_data['departure_method']
     
     score = 0
-    if departure_method in ['RELEASED', 'WAIVED', 'TRADED']: 
+    if departure_method in ['RELEASED', 'WAIVED', 'TRADED', 'TRADE']: 
         score += 1
         print(f'{player_name} was {departure_method}. Adding 1 point')
     elif departure_method == 'F/A': 

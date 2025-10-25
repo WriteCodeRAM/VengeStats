@@ -139,7 +139,7 @@ def process_single_team_api(team_abbr):
 
 
 teams_to_process = [
-    'SAS'
+    'WAS'
 ]
 
 if __name__ == "__main__":

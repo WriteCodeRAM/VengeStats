@@ -13,15 +13,18 @@ from schemas.revenge_types import EnrichedNBARevengePlayer
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()
     revenge_games =get_nba_revenge_games([
-     [27, 3],   # SAS vs BKN
-    [9, 2],    # DET vs BOS
-    [6, 17],   # CLE vs MIL
-    [16, 20],  # MIA vs NYK
-    [30, 4],   # WAS vs CHA
-    [18, 12],  # MIN vs IND
-    [7, 28],   # DAL vs TOR
-    [13, 25],  # LAC vs POR
-    [26, 14],  # SAC vs LAL
+   # October 27 NBA Matchups
+    [6, 9],   # CLE @ DET
+    [22, 23], # ORL @ PHI
+    [1, 5],   # ATL @ CHI
+    [3, 11],  # BKN @ HOU
+    [2, 19],  # BOS @ NOP
+    [28, 27], # TOR @ SAS
+    [21, 7],  # OKC @ DAL
+    [24, 29], # PHX @ UTA
+    [8, 18],  # DEN @ MIN
+    [15, 10], # MEM @ GSW
+    [25, 14], # POR @ LAL
     ])
     updated_games = get_nba_injuries(revenge_games)
     
@@ -48,18 +51,15 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
         revenge_data, nonrevenge_data = get_fair_comparison(nba_api_id, former_team_abbr, player[6])
         revenge_score, differentials = calculate_nba_venge_score(player[3], player[0], player[4], revenge_data, nonrevenge_data, player[7])
         
-        # print(differentials)
 
-        # player[3] = db player id 
+
+        #player[3] = db player id 
         #player[4] opponent team id 
         # Calculate W/L record from revenge_data
         wins = len(revenge_data[revenge_data['WL'] == 'W']) if not revenge_data.empty else 0
         losses = len(revenge_data[revenge_data['WL'] == 'L']) if not revenge_data.empty else 0
         total_revenge_games = len(revenge_data) if not revenge_data.empty else 0
         total_games_played_for_opp = get_total_games_played_for_team(player[3], player[4])
-        # print(f'{player[0]} record is {wins}-{losses}')
-        # print(differentials)
-        
         # Get departure year
         departure_year = player[6].year if player[6] else None
 

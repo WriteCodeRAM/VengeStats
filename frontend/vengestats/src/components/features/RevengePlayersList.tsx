@@ -71,7 +71,7 @@ export function RevengePlayersList() {
       {/* NBA Section */}
       <HorizontalPlayerScroll
         title="NBA Revenge Games 🏀"
-        subtitle={`Revenge Matchups: October 29, 2025`}
+        subtitle={`Revenge Matchups: October 30, 2025`}
         players={nbaPlayers}
       />
       {/* NFL Section */}

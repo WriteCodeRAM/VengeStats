@@ -13,10 +13,14 @@ from schemas.revenge_types import EnrichedNBARevengePlayer
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()
     revenge_games = get_nba_revenge_games([
-    [22, 4],   # ORL @ CHA
-    [10, 17],  # GSW @ MIL
-    [30, 21],  # WAS @ OKC
-    [16, 27],  # MIA @ SAS
+    [1, 12],   # ATL @ IND
+    [2, 23],   # BOS @ PHI
+    [28, 6],   # TOR @ CLE
+    [20, 5],   # NYK @ CHI
+    [14, 15],  # LAL @ MEM
+    [29, 24],  # UTA @ PHX
+    [8, 25],   # DEN @ POR
+    [19, 13],  # NOP @ LAC
 ])
     updated_games = get_nba_injuries(revenge_games)
     

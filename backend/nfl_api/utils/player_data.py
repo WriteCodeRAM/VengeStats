@@ -442,25 +442,25 @@ def process_team_roster(team_id):
     print(f"📊 Team: {team_info['team_name']}")
     return True
 
-# def main():
-#     """Test the updated roster processing"""
-#     print("=== NFL Roster Processor - New Schema ===")
-#     print("🎯 Target positions:", ", ".join(TARGET_POSITIONS))
-#     print()
+def main():
+    """Test the updated roster processing"""
+    print("=== NFL Roster Processor - New Schema ===")
+    print("🎯 Target positions:", ", ".join(TARGET_POSITIONS))
+    print()
     
 
-#     test_team_id = "34" 
-#     success = process_team_roster(test_team_id)
+    test_team_id = "4" 
+    success = process_team_roster(test_team_id)
     
-#     if success:
-#         print("\n✅ Roster processing completed successfully!")
-#         print("New fields populated:")
-#         print("- usage_tier (STARTER/ROTATIONAL/BACKUP/INACTIVE)")
-#         print("- draft info (round, number, team)")
-#         print("- accolades (Pro Bowls, All-Pros)")
-#         print("- years of experience")
-#     else:
-#         print("\n❌ Roster processing failed")
+    if success:
+        print("\n✅ Roster processing completed successfully!")
+        print("New fields populated:")
+        print("- usage_tier (STARTER/ROTATIONAL/BACKUP/INACTIVE)")
+        print("- draft info (round, number, team)")
+        print("- accolades (Pro Bowls, All-Pros)")
+        print("- years of experience")
+    else:
+        print("\n❌ Roster processing failed")
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

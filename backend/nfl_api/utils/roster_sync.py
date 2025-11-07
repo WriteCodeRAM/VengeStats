@@ -43,4 +43,4 @@ def sync_team_roster(team_id):
     print(f"Roster sync complete for team {team_id}")
     return True
 
-sync_team_roster("34")
+sync_team_roster("4")

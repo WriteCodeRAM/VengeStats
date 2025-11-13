@@ -185,7 +185,7 @@ def calculate_usage_tier(player_id, position, seasons=[2024]):
 def get_draft_info(player_id):
     """Get draft information for a player"""
     try:
-        draft_data = nfl.import_draft_picks([2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024])
+        draft_data = nfl.import_draft_picks([2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025])
         player_draft = draft_data[draft_data['gsis_id'] == player_id]
         
         if not player_draft.empty:
@@ -204,7 +204,7 @@ def get_draft_info(player_id):
 def get_accolades(player_id):
     """Get Pro Bowl and All-Pro selections"""
     try:
-        draft_data = nfl.import_draft_picks([2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024])
+        draft_data = nfl.import_draft_picks([2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024,2025])
         player_draft = draft_data[draft_data['gsis_id'] == player_id]
         
         if not player_draft.empty:

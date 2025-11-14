@@ -71,7 +71,11 @@ export function RevengePlayersList() {
       {/* NBA Section */}
       <HorizontalPlayerScroll
         title="NBA Revenge Games 🏀"
-        subtitle={`Revenge Matchups: November 13, 2025`}
+        subtitle={`${nbaPlayers.length} revenge ${
+          nbaPlayers.length > 1 || nbaPlayers.length == 0
+            ? "matchups"
+            : "matchup"
+        } in the NBA today`}
         players={nbaPlayers}
       />
       {/* NFL Section */}

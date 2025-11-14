@@ -6,7 +6,6 @@ import json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
-from cron.refresh_cache import refresh_cache
 from schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
 from db.venge_data import convert_numpy_to_python
 

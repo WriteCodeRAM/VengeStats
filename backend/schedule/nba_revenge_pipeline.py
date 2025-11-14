@@ -4,19 +4,21 @@ from scrapers.injury_scrapers import get_nba_injuries
 from db.venge_data import calculate_nba_venge_score
 from nba_utils.utils.data_fetcher import get_fair_comparison
 from nba_utils.utils.player_utils import search_player
-from db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name, get_current_team_id
+from db.queries.nba.teams import teams, team_id_to_abbr, team_id_to_full_name, get_current_team_id
 from db.queries.nba.players import get_total_games_played_for_team, get_player_career_history
 import time
 from typing import List
 from schemas.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
-    # revenge_games = get_nba_schedule()
-    revenge_games = get_nba_revenge_games([
-    [28, 6],   # TOR @ CLE
-    [12, 24],  # IND @ PHX
-    [1, 29],   # ATL @ UTA
-])
+    revenge_games = get_nba_schedule()
+    matchups = [] 
+
+    for game in revenge_games: 
+        game = game.split(" @ ")
+        matchups.append([teams[game[0]], teams[game[1]]])
+
+    revenge_games = get_nba_revenge_games(matchups)
     updated_games = get_nba_injuries(revenge_games)
     
     enriched_games = []

@@ -183,9 +183,17 @@ async def cron_refresh(cache_key):
     if not expected_key or cache_key != expected_key:
         raise HTTPException(status_code=401, detail="Unauthorized")
     
-    refresh_cache()
-    return {"status": "ok"}
-
+    client = get_redis_client()
+    if client:
+        client.flushall()
+    
+    result = await matchups()
+    
+    return {
+        "status": "success",
+        "nba_count": len(result.get('nba_revenge_matchups', [])),
+        "nfl_count": len(result.get('nfl_revenge_matchups', []))
+    }
 
 if __name__ == "__main__":
     import uvicorn

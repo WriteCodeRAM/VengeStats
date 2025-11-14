@@ -6,6 +6,7 @@ import json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
+from cron.refresh_cache import refresh_cache
 from schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
 from db.venge_data import convert_numpy_to_python
 
@@ -175,6 +176,16 @@ async def cache_status():
         }
     except Exception as e:
         return {"connected": False, "error": str(e)}
+
+@app.get("/cron/refresh-cache/{cache_key}")
+async def cron_refresh(cache_key):
+    expected_key = os.getenv('CACHE_KEY')
+    if not expected_key or cache_key != expected_key:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    refresh_cache()
+    return {"status": "ok"}
+
 
 if __name__ == "__main__":
     import uvicorn

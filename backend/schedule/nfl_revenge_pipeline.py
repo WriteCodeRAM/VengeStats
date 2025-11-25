@@ -5,23 +5,24 @@ from nfl_api.utils.player_stats import get_all_nfl_player_data
 
 def get_weekly_revenge_matchups(): 
 
-    matchups = week12_matchups = [
-    ["2", "34"],   # BUF @ HOU  (TNF)
-    ["20", "33"],  # NYJ @ BAL
-    ["23", "3"],   # PIT @ CHI
-    ["17", "4"],   # NE @ CIN
-    ["19", "8"],   # NYG @ DET
-    ["16", "9"],   # MIN @ GB
-    ["11", "12"],  # IND @ KC
-    ["26", "10"],  # SEA @ TEN
-    ["30", "22"],  # JAX @ ARI
-    ["5", "13"],   # CLE @ LV
-    ["21", "6"],   # PHI @ DAL
-    ["1", "18"],   # ATL @ NO
-    ["27", "14"],  # TB @ LAR  (SNF)
-    ["29", "25"],  # CAR @ SF  (MNF)
+    matchups = [
+    ["9", "8"],     # GB @ DET (Thu 1:00 PM)
+    ["12", "6"],    # KC @ DAL (Thu 4:30 PM)
+    ["4", "33"],    # CIN @ BAL (Thu 8:20 PM)
+    ["3", "21"],    # CHI @ PHI (Fri 3:00 PM)
+    ["25", "5"],    # SF @ CLE (Sun 1:00 PM)
+    ["30", "10"],   # JAX @ TEN (Sun 1:00 PM)
+    ["34", "11"],   # HOU @ IND (Sun 1:00 PM)
+    ["18", "15"],   # NO @ MIA (Sun 1:00 PM)
+    ["1", "19"],    # ATL @ NYG (Sun 1:00 PM)
+    ["22", "27"],   # ARI @ TB (Sun 1:00 PM)
+    ["14", "29"],   # LAR @ CAR (Sun 1:00 PM)
+    ["16", "26"],   # MIN @ SEA (Sun 4:05 PM)
+    ["2", "23"],    # BUF @ PIT (Sun 4:25 PM)
+    ["13", "24"],   # LV @ LAC (Sun 4:25 PM)
+    ["7", "28"],    # DEN @ WAS (Sun 8:20 PM)
+    ["20", "17"],   # NYJ @ NE (Mon 8:15 PM)
 ]
-
 
     revenge_players = get_nfl_revenge_games(matchups)
     

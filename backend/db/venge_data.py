@@ -183,18 +183,19 @@ def calculate_nfl_venge_score(
         score += 0.2
     comparison = None
 
-    # 1. TENURE IMPACT (0-3.5 points) 
-    if total_games_played_for_team > 0:
-        if total_games_played_for_team >= 48:  # 3+ full seasons
-            tenure_score = 3.0 + min((total_games_played_for_team - 48) * 0.02, 0.5)  # 3.0-3.5 points
-        elif total_games_played_for_team >= 32:  # 2-3 seasons
-            tenure_score = 2.2 + (total_games_played_for_team - 32) * 0.05  # 2.2-3.0 points
-        elif total_games_played_for_team >= 16:  # 1-2 seasons  
-            tenure_score = 1.3 + (total_games_played_for_team - 16) * 0.056  # 1.3-2.2 points
-        else:  # Less than 1 season
-            tenure_score = 0.5 + total_games_played_for_team * 0.05  # 0.5-1.3 points
-        
-        score += tenure_score
+    # 1. TENURE IMPACT (0-3.5 points)
+    if total_games_played_for_team:  
+        if total_games_played_for_team > 0:
+            if total_games_played_for_team >= 48:  # 3+ full seasons
+                tenure_score = 3.0 + min((total_games_played_for_team - 48) * 0.02, 0.5)  # 3.0-3.5 points
+            elif total_games_played_for_team >= 32:  # 2-3 seasons
+                tenure_score = 2.2 + (total_games_played_for_team - 32) * 0.05  # 2.2-3.0 points
+            elif total_games_played_for_team >= 16:  # 1-2 seasons  
+                tenure_score = 1.3 + (total_games_played_for_team - 16) * 0.056  # 1.3-2.2 points
+            else:  # Less than 1 season
+                tenure_score = 0.5 + total_games_played_for_team * 0.05  # 0.5-1.3 points
+            
+            score += tenure_score
 
     # 2. DRAFT TEAM BONUS (2.5 points) - Facing the team that drafted you
     if draft_team and str(opponent_team_id) in str(draft_team):

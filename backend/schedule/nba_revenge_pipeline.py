@@ -29,8 +29,9 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # player[3] = db player id 
     # player[4] opponent team id 
     for player in updated_games:
-        if player[2] == "Out":  # Skip injured players
-            continue
+        # gonna include injured players but have an asterisk on the frontend 
+        # if player[2] == "Out":  # Skip injured players
+        #     continue
 
         
         time.sleep(5)

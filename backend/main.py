@@ -3,11 +3,12 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import redis
 import json
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
 from schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
 from db.venge_data import convert_numpy_to_python
+from nba_utils.utils.weekly_sync import run_db_sync
 
 app = FastAPI()
 
@@ -143,7 +144,7 @@ async def get_nfl_player_profile(player_id: int):
         
     raise HTTPException(status_code=404, detail="Player not found")
 
-@app.get("/cache/clear/{cache_key}")
+@app.post("/cache/clear/{cache_key}")
 async def clear_cache(cache_key: str):
     expected_key = os.getenv('CACHE_KEY')
     
@@ -175,24 +176,45 @@ async def cache_status():
         }
     except Exception as e:
         return {"connected": False, "error": str(e)}
-
-@app.get("/cron/refresh-cache/{cache_key}")
-async def cron_refresh(cache_key):
+    
+@app.post("/cron/refresh-cache/{cache_key}")
+async def cron_refresh(cache_key: str):
     expected_key = os.getenv('CACHE_KEY')
+
     if not expected_key or cache_key != expected_key:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
+
+    # Clear redis cache
     client = get_redis_client()
     if client:
         client.flushall()
-    
+
+    # Rebuild matchups
     result = await matchups()
-    
+
     return {
         "status": "success",
         "nba_count": len(result.get('nba_revenge_matchups', [])),
         "nfl_count": len(result.get('nfl_revenge_matchups', []))
     }
+
+
+
+@app.post("/cron/sync-rosters")
+async def roster_refresh(request: Request):
+    incoming = request.headers.get("X-Cron-Key")
+    expected = os.getenv("CRON_SECRET")
+
+    if incoming != expected:
+        raise HTTPException(401, "Unauthorized")
+
+    roster_results, sync_results = run_db_sync()
+
+    return {
+        "roster_status": roster_results,
+        "sync_status": sync_results
+    }
+
 
 if __name__ == "__main__":
     import uvicorn

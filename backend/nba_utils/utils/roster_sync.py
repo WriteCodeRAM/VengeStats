@@ -11,6 +11,16 @@ from db.queries.nba.players import (
 from db.database import get_connection
 from psycopg2 import sql
 
+def mark_player_needs_stint_refresh(player_id: int):
+    """Mark that this player's stints need to be resynced"""
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                UPDATE nba_players 
+                SET needs_stint_refresh = TRUE
+                WHERE id = %s
+            """, (player_id,))
+            conn.commit()
 
 def get_team_roster_from_api(team_id, season='2025-26'):
     """Get current roster using NBA API with automatic season detection"""
@@ -124,10 +134,14 @@ def handle_new_or_moved_player(api_player: dict, new_team_id: int):
             print(f"    Player moved: {full_name} from team {old_team_id} -> {new_team_id}")
             move_player_to_team(player_id, new_team_id)
 
+        mark_player_needs_stint_refresh(player_id)
+        print(f"    Marked for stint refresh: {full_name}")
     else:
         print(f"    New player detected: {full_name} - adding to database")
         new_player_id = insert_new_player(first_name, last_name, new_team_id, nba_api_player_id)
         print(f"    Added {full_name} with ID {new_player_id}")
+        mark_player_needs_stint_refresh(new_player_id)
+        print(f"    Marked for stint refresh: {full_name}")
 
 def handle_remaining_players(remaining_set: Set[Tuple[int, str, str]], team_id: int):
     """Handle players who moved off team - send them to free agency (team 31)"""
@@ -218,4 +232,4 @@ def sync_all_teams():
     return results
 
 if __name__ == "__main__":
-    sync_team_roster(30)  
+    sync_all_teams() 

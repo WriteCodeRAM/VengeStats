@@ -191,17 +191,42 @@ def insert_api_player_stint(player_id, team_id, start_date, end_date, games_play
         with conn.cursor() as cursor: 
             cursor.execute(
                 """
-                INSERT INTO nba_player_team_stints_api (player_id, team_id, first_game_date, last_game_date, games_played, nba_api_player_id)
+                INSERT INTO nba_player_team_stints_api (
+                    player_id, team_id, first_game_date, last_game_date,
+                    games_played, nba_api_player_id
+                )
                 VALUES (%s, %s, %s, %s, %s, %s)
                 ON CONFLICT (player_id, team_id, first_game_date) 
                 DO UPDATE SET 
                     last_game_date = EXCLUDED.last_game_date,
                     games_played = EXCLUDED.games_played,
                     nba_api_player_id = EXCLUDED.nba_api_player_id,
-                    created_at = CURRENT_TIMESTAMP
+                    last_verified = CURRENT_TIMESTAMP
                 """,
                 (player_id, team_id, start_date, end_date, games_played, nba_api_player_id)
             )
+        conn.commit()
+
+    mark_current_stint(player_id)
+
+def mark_current_stint(player_id):
+    """Mark the current stint as TRUE based on end_date being NULL, all others FALSE"""
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            # Reset all stints to FALSE
+            cursor.execute("""
+                UPDATE nba_player_team_stints_api
+                SET is_current = FALSE
+                WHERE player_id = %s
+            """, (player_id,))
+
+            # Mark the stint with no end_date as current
+            cursor.execute("""
+                UPDATE nba_player_team_stints_api
+                SET is_current = TRUE
+                WHERE player_id = %s AND last_game_date IS NULL
+            """, (player_id,))
+        
         conn.commit()
 
 def move_player_to_team(player_id: int, new_team_id: int):

@@ -198,23 +198,19 @@ async def cron_refresh(cache_key: str):
         "nfl_count": len(result.get('nfl_revenge_matchups', []))
     }
 
+@app.post("/cron/sync-rosters/{cache_key}")
+async def roster_refresh(cache_key: str):
+    expected_key = os.getenv('CACHE_KEY')
 
-
-@app.post("/cron/sync-rosters")
-async def roster_refresh(request: Request):
-    incoming = request.headers.get("X-Cron-Key")
-    expected = os.getenv("CRON_SECRET")
-
-    if incoming != expected:
-        raise HTTPException(401, "Unauthorized")
+    if not expected_key or cache_key != expected_key:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     roster_results, sync_results = run_db_sync()
 
     return {
-        "roster_status": roster_results,
-        "sync_status": sync_results
+        roster_results,
+        sync_results
     }
-
 
 if __name__ == "__main__":
     import uvicorn

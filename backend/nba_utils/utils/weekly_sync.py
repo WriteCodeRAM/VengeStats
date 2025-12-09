@@ -1,5 +1,5 @@
-from roster_sync import sync_all_teams
-from smart_stint_sync import sync_stints_for_changed_players
+from nba_utils.utils.roster_sync import sync_all_teams
+from nba_utils.utils.smart_stint_sync import sync_stints_for_changed_players
 import time
 
 def run_db_sync():

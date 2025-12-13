@@ -15,9 +15,12 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     matchups = [] 
 
     for game in revenge_games: 
-        game = game.split(" @ ")
-        matchups.append([teams[game[0]], teams[game[1]]])
-
+        if " @ " in game:
+            home, away = game.split(" @ ")
+        elif " vs " in game or " VS " in game:
+            home, away = game.replace(" VS ", " vs ").split(" vs ")
+    
+    matchups.append([teams[home], teams[away]])
     revenge_games = get_nba_revenge_games(matchups)
     updated_games = get_nba_injuries(revenge_games)
     

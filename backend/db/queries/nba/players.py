@@ -261,5 +261,12 @@ def move_player_to_team(player_id: int, new_team_id: int):
             conn.commit()
 
 
-# sort based on index 1 (start date)
-# merge intervals type thing where we use the later end date if the next idx is the same team as well (for instances like KD (SEA -> OKC)) 
+def get_players_missing_api_id():
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, first_name, last_name 
+                FROM nba_players 
+                WHERE nba_api_player_id IS NULL
+            """)
+            return cursor.fetchall()  # [(id, first_name, last_name), ...]

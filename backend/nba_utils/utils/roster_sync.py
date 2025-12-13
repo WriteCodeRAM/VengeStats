@@ -232,4 +232,4 @@ def sync_all_teams():
     return results
 
 if __name__ == "__main__":
-    sync_all_teams() 
+    sync_team_roster(13)

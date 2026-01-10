@@ -6,23 +6,16 @@ from nfl_api.utils.player_stats import get_all_nfl_player_data
 def get_weekly_revenge_matchups(): 
 
     matchups = [
-        ["29", "27"],  # CAR @ TB   (Sat)
-        ["26", "25"],  # SEA @ SF   (Sat)
-        ["18", "1"],   # NO @ ATL
-        ["5", "4"],    # CLE @ CIN
-        ["9", "16"],   # GB @ MIN
-        ["6", "20"],   # DAL @ NYJ
-        ["10", "30"],  # TEN @ JAX
-        ["11", "34"],  # IND @ HOU
-        ["20", "2"],   # NYJ @ BUF
-        ["8", "3"],    # DET @ CHI
-        ["24", "7"],   # LAC @ DEN
-        ["12", "13"],  # KC @ LV
-        ["22", "14"],  # ARI @ LAR
-        ["15", "17"],  # MIA @ NE
-        ["28", "21"],  # WAS @ PHI
-        ["33", "23"],  # BAL @ PIT  (SNF)
-    ]
+    ["14", "29"],  # LAR @ CAR
+    ["9", "3"],    # GB @ CHI
+
+    ["2", "30"],   # BUF @ JAX
+    ["25", "21"],  # SF @ PHI
+    ["24", "17"],  # LAC @ NE
+
+    ["34", "23"],  # HOU @ PIT
+]
+
 
     revenge_players = get_nfl_revenge_games(matchups)
     

@@ -6,10 +6,8 @@ from nfl_api.utils.player_stats import get_all_nfl_player_data
 def get_weekly_revenge_matchups(): 
 
     matchups = [
-    ["2", "7"],     # BUF @ DEN
-    ["25", "26"],   # SF @ SEA
-    ["34", "17"],   # HOU @ NE
-    ["14", "3"],    # LAR @ CHI
+    ["17", "7"],    # NE @ DEN  (AFC Championship)
+    ["14", "26"],   # LAR @ SEA (NFC Championship)
 ]
 
     revenge_players = get_nfl_revenge_games(matchups)

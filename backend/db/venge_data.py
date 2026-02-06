@@ -5,13 +5,38 @@ from nba_utils.utils.data_fetcher import compare_stats
 import numpy as np
 import pandas as pd
 
-# All-Star Selections for 2024-2025 Season
+# All-Star Selections for 2025-2026 Season
 all_stars = {
-    "LeBron James", "Jaylen Brown", "Stephen Curry", "Kevin Durant", "James Harden",
-    "Kyrie Irving", "Damian Lillard", "Jayson Tatum", "Nikola Jokic", "Shai Gilgeous-Alexander",
-    "Donovan Mitchell", "Pascal Siakam", "Karl-Anthony Towns", "Alperen Sengun",
-    "Victor Wembanyama", "Trae Young", "Anthony Edwards", "Jalen Brunson", "Cade Cunningham",
-    "Darius Garland", "Tyler Herro", "Jaren Jackson Jr.", "Evan Mobley", "Jalen Williams"
+    # Team USA Stars
+    "Cade Cunningham",
+    "Tyrese Maxey",
+    "Scottie Barnes",
+    "Devin Booker",
+    "Jalen Duren",
+    "Anthony Edwards",
+    "Chet Holmgren",
+    "Jalen Johnson",
+
+    # Team USA Stripes
+    "Jaylen Brown",
+    "Jalen Brunson",
+    "Stephen Curry",
+    "Kevin Durant",
+    "LeBron James",
+    "Donovan Mitchell",
+    "Norman Powell",
+    "Kawhi Leonard",
+
+    # Team World
+    "Giannis Antetokounmpo",
+    "Luka Doncic",
+    "Shai Gilgeous-Alexander",
+    "Nikola Jokic",
+    "Victor Wembanyama",
+    "Deni Avdija",
+    "Jamal Murray",
+    "Pascal Siakam",
+    "Karl-Anthony Towns"
 }
 
 # Players with strong revenge narratives (long tenure, messy exits, emotional returns)

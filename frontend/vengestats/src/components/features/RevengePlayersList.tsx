@@ -27,12 +27,12 @@ export function RevengePlayersList() {
         const nflPlayers = data.nfl_revenge_matchups || [];
         const sortedNBAPlayers = nbaPlayers.sort(
           (a: NBARevengePlayer, b: NBARevengePlayer) =>
-            b.venge_score - a.venge_score
+            b.venge_score - a.venge_score,
         );
 
         const sortedNFLPlayers = nflPlayers.sort(
           (a: NFLRevengePlayer, b: NFLRevengePlayer) =>
-            b.venge_score - a.venge_score
+            b.venge_score - a.venge_score,
         );
 
         setNBAPlayers(sortedNBAPlayers);
@@ -40,7 +40,7 @@ export function RevengePlayersList() {
       } catch (err) {
         console.error("Failed to fetch players:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to fetch players"
+          err instanceof Error ? err.message : "Failed to fetch players",
         );
       } finally {
         setLoading(false);
@@ -81,7 +81,7 @@ export function RevengePlayersList() {
       {/* NFL Section */}
       <HorizontalPlayerScroll
         title="NFL Revenge Games 🏈"
-        subtitle={`${nflPlayers.length} players seeking vengeance in the conference championship`}
+        subtitle={`${nflPlayers.length} players seeking vengeance in the SuperBowl`}
         players={nflPlayers}
       />
     </div>

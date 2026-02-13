@@ -75,7 +75,7 @@ export function RevengePlayersList() {
           nbaPlayers.length > 1 || nbaPlayers.length == 0
             ? "matchups"
             : "matchup"
-        } in the NBA today`}
+        } in the NBA on Feb. 19th`}
         players={nbaPlayers}
       />
       {/* NFL Section */}

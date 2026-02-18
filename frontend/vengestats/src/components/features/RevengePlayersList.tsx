@@ -75,13 +75,13 @@ export function RevengePlayersList() {
           nbaPlayers.length > 1 || nbaPlayers.length == 0
             ? "matchups"
             : "matchup"
-        } in the NBA on Feb. 19th`}
+        } in the NBA today`}
         players={nbaPlayers}
       />
       {/* NFL Section */}
       <HorizontalPlayerScroll
         title="NFL Revenge Games 🏈"
-        subtitle={`${nflPlayers.length} players seeking vengeance in the SuperBowl`}
+        subtitle={`NFL Revenge Game Tracking Will Return September, 9, 2026!`}
         players={nflPlayers}
       />
     </div>

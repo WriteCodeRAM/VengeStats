@@ -11,27 +11,16 @@ from typing import List
 from schemas.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
-    # revenge_games = get_nba_schedule()
-    matchups = [
-        [11, 4],   # Rockets @ Hornets
-        [3, 6],    # Nets @ Cavaliers
-        [1, 23],   # Hawks @ 76ers
-        [12, 30],  # Pacers @ Wizards
-        [9, 20],   # Pistons @ Knicks
-        [28, 5],   # Raptors @ Bulls
-        [24, 27],  # Suns @ Spurs
-        [2, 10],   # Celtics @ Warriors
-        [22, 26],  # Magic @ Kings
-        [8, 13],   # Nuggets @ Clippers
-    ]
+    revenge_games = get_nba_schedule()
+    matchups = [] 
 
-    # for game in revenge_games: 
-    #     if " @ " in game:
-    #         home, away = game.split(" @ ")
-    #     elif " vs " in game or " VS " in game:
-    #         home, away = game.replace(" VS ", " vs ").split(" vs ")
+    for game in revenge_games: 
+        if " @ " in game:
+            home, away = game.split(" @ ")
+        elif " vs " in game or " VS " in game:
+            home, away = game.replace(" VS ", " vs ").split(" vs ")
     
-    #     matchups.append([teams[home], teams[away]])
+        matchups.append([teams[home], teams[away]])
     revenge_games = get_nba_revenge_games(matchups)
     updated_games = get_nba_injuries(revenge_games)
         
@@ -44,8 +33,8 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # player[4] opponent team id 
     for player in updated_games:
         # gonna include injured players but have an asterisk on the frontend 
-        # if player[2] == "Out":  # Skip injured players
-        #     continue
+        if player[2] == "Out":  # Skip injured players
+            continue
 
         
         time.sleep(5)

@@ -1,18 +1,20 @@
 from typing import List, Tuple
 import requests
+import os
 import datetime
 from db.queries.nba.teams import teams
 
+api_key = os.getenv('SPORTS_BLAZE_API_KEY')
 def get_nba_schedule() -> List[str]: 
     date = str(datetime.datetime.now())
-    url = f"https://api.sportsblaze.com/nba/v1/schedule/daily/{date[0:10]}.json?key=sbfi6s44prpydwj0osyjkra"
+    url = f"https://api.sportsblaze.com/nba/v1/schedule/daily/{date[0:10]}.json?key={api_key}"
     response = requests.get(url)
     
     if response.status_code == 200:
         data = response.json()
         schedule = []
         games = data.get("games", [])
-        
+
         for game in games: 
             schedule.append([game['teams']['away']['name'], game['teams']['home']['name']])
         

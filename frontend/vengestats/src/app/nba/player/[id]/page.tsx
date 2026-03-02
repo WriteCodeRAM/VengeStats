@@ -362,7 +362,7 @@ export default function PlayerProfilePage({
             <div className="text-text-secondary text-sm">
               {player.total_revenge_games > 0
                 ? `${player.total_revenge_games + 1}${getOrdinalSuffix(
-                    player.total_revenge_games + 1
+                    player.total_revenge_games + 1,
                   )} revenge game against ${player.former_team_name}`
                 : `First revenge game against ${player.former_team_name}`}
             </div>
@@ -396,21 +396,21 @@ export default function PlayerProfilePage({
                   <StatRow
                     label="Rebounds Per Game"
                     value={player.differentials.revenge_stats.rebounds.toFixed(
-                      1
+                      1,
                     )}
                     color="text-venge-red"
                   />
                   <StatRow
                     label="Assists Per Game"
                     value={player.differentials.revenge_stats.assists.toFixed(
-                      1
+                      1,
                     )}
                     color="text-venge-red"
                   />
                   <StatRow
                     label="Minutes Per Game"
                     value={player.differentials.revenge_stats.minutes.toFixed(
-                      1
+                      1,
                     )}
                     color="text-venge-red"
                   />
@@ -451,21 +451,21 @@ export default function PlayerProfilePage({
                   <StatRow
                     label="Rebounds Per Game"
                     value={player.differentials.regular_stats.rebounds.toFixed(
-                      1
+                      1,
                     )}
                     color="text-blue-400"
                   />
                   <StatRow
                     label="Assists Per Game"
                     value={player.differentials.regular_stats.assists.toFixed(
-                      1
+                      1,
                     )}
                     color="text-blue-400"
                   />
                   <StatRow
                     label="Minutes Per Game"
                     value={player.differentials.regular_stats.minutes.toFixed(
-                      1
+                      1,
                     )}
                     color="text-blue-400"
                   />
@@ -557,8 +557,8 @@ function DifferentialItem({ label, value }: { label: string; value: number }) {
           isPositive
             ? "text-green-400"
             : isNegative
-            ? "text-red-400"
-            : "text-text-secondary"
+              ? "text-red-400"
+              : "text-text-secondary"
         }`}
       >
         {isPositive ? "+" : ""}

@@ -35,6 +35,16 @@ team_id_to_full_name = {
     26: "Sacramento Kings", 27: "San Antonio Spurs", 28: "Toronto Raptors",  29: "Utah Jazz", 30: "Washington Wizards"
 }
 
+team_full_name_to_id = {
+    "Atlanta Hawks": 1,"Boston Celtics": 2, "Brooklyn Nets": 3, "Charlotte Hornets": 4, "Chicago Bulls": 5,
+    "Cleveland Cavaliers": 6, "Dallas Mavericks": 7, "Denver Nuggets": 8,  "Detroit Pistons": 9,
+    "Golden State Warriors": 10, "Houston Rockets": 11, "Indiana Pacers": 12, "LA Clippers": 13,
+    "Los Angeles Lakers": 14, "Memphis Grizzlies": 15, "Miami Heat": 16, "Milwaukee Bucks": 17,
+    "Minnesota Timberwolves": 18, "New Orleans Pelicans": 19, "New York Knicks": 20, "Oklahoma City Thunder": 21,
+    "Orlando Magic": 22, "Philadelphia 76ers": 23, "Phoenix Suns": 24, "Portland Trail Blazers": 25, "Sacramento Kings": 26,
+    "San Antonio Spurs": 27,  "Toronto Raptors": 28, "Utah Jazz": 29, "Washington Wizards": 30
+}
+
 # team mapping (1-30) to NBA API IDs
 team_id_to_nba_api_id = {
     1: 1610612737,   # ATL

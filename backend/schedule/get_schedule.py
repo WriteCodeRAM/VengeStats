@@ -1,16 +1,21 @@
 from typing import List, Tuple
 import requests
+import datetime
 from db.queries.nba.teams import teams
 
 def get_nba_schedule() -> List[str]: 
-    url = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
+    date = str(datetime.datetime.now())
+    url = f"https://api.sportsblaze.com/nba/v1/schedule/daily/{date[0:10]}.json?key=sbfi6s44prpydwj0osyjkra"
     response = requests.get(url)
     
     if response.status_code == 200:
         data = response.json()
-        games = data.get("events", [])
+        schedule = []
+        games = data.get("games", [])
         
-        schedule = [game.get("shortName", "Unknown vs Unknown") for game in games]
+        for game in games: 
+            schedule.append([game['teams']['away']['name'], game['teams']['home']['name']])
+        
         return schedule
     else:
         print("Failed to fetch NBA schedule")

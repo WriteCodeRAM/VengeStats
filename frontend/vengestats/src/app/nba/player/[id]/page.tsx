@@ -142,34 +142,18 @@ export default function PlayerProfilePage({
                         className="flex items-center gap-4 flex-shrink-0"
                       >
                         <div className="relative group cursor-pointer">
-                          <div
-                            className={`px-4 py-3 rounded-xl text-center min-w-20 transition-all duration-300 hover:transform hover:-translate-y-1 ${
-                              index === player.history.length - 1
-                                ? "bg-blue-600"
-                                : "bg-gray-600"
-                            }`}
-                          >
+                          <div>
                             <div className="font-semibold">
-                              {stint.team_abbr}
-                            </div>
-                            <div className="text-xs text-gray-300">
-                              {stint.start_year}-{stint.end_year || "Present"}
+                              <Image
+                                src={`/nba_logos/${stint.team_abbr}.png`}
+                                alt="team logo"
+                                width={50}
+                                height={50}
+                              />
                             </div>
                           </div>
 
-                          {/* Hover Tooltip */}
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                            <div className="bg-dark-bg border border-borderDefault rounded-lg p-3 whitespace-nowrap text-sm">
-                              <div className="font-semibold mb-1">
-                                {stint.team_full_name}
-                              </div>
-                              <div className="text-text-secondary text-xs">
-                                {stint.start_year}-{stint.end_year || "Present"}{" "}
-                                • {stint.games_played} games
-                              </div>
-                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-borderDefault"></div>
-                            </div>
-                          </div>
+                          {/* Hover Tooltip removed till data is consistent */}
                         </div>
 
                         {/* Arrow between teams */}
@@ -258,7 +242,7 @@ export default function PlayerProfilePage({
           {/* Mobile Layout */}
           <div className="md:hidden space-y-6">
             {/* Top: Player Image + Venge Score */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center flex-col gap-1 justify-between">
               <div className="w-24 h-24 bg-gray-600 rounded-full overflow-hidden border-4 border-venge-red relative">
                 <Image
                   src={`https://cdn.nba.com/headshots/nba/latest/1040x760/${player.nba_api_id}.png`}
@@ -282,7 +266,7 @@ export default function PlayerProfilePage({
                 </div>
               </div>
 
-              <div className="bg-venge-red text-white px-4 py-3 rounded-xl text-center">
+              <div className="bg-venge-red text-white px-3 py-2 rounded-xl text-center">
                 <div className="text-2xl font-bold">{player.venge_score}</div>
                 <div className="text-xs opacity-90">VENGE SCORE</div>
               </div>
@@ -300,7 +284,13 @@ export default function PlayerProfilePage({
               <div className="text-text-secondary text-sm font-semibold mb-3 text-center">
                 CAREER TIMELINE
               </div>
-              <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              <div
+                className={`flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide ${
+                  player.history && player.history.length < 4
+                    ? "justify-center"
+                    : ""
+                }`}
+              >
                 {player.history && player.history.length > 0 ? (
                   player.history.map((stint, index) => (
                     <div
@@ -308,18 +298,14 @@ export default function PlayerProfilePage({
                       className="flex items-center gap-3 flex-shrink-0"
                     >
                       <div className="relative group cursor-pointer">
-                        <div
-                          className={`px-3 py-2 rounded-lg text-center min-w-16 transition-all duration-300 ${
-                            index === player.history.length - 1
-                              ? "bg-blue-600"
-                              : "bg-gray-600"
-                          }`}
-                        >
+                        <div>
                           <div className="font-semibold text-sm">
-                            {stint.team_abbr}
-                          </div>
-                          <div className="text-xs text-gray-300">
-                            {stint.start_year}-{stint.end_year || "Present"}
+                            <Image
+                              src={`/nba_logos/${stint.team_abbr}.png`}
+                              alt="team logo"
+                              width={50}
+                              height={50}
+                            />
                           </div>
                         </div>
                       </div>
@@ -334,26 +320,14 @@ export default function PlayerProfilePage({
                   ))
                 ) : (
                   // Mobile fallback
-                  <div className="flex items-center gap-3 justify-center">
-                    <div className="bg-gray-600 px-3 py-2 rounded-lg text-center min-w-16">
-                      <div className="font-semibold text-sm">
-                        {player.former_team_abbr}
-                      </div>
-                      <div className="text-xs text-gray-300">Former</div>
-                    </div>
-                    <div className="text-text-secondary text-sm">→</div>
-                    <div className="bg-blue-600 px-3 py-2 rounded-lg text-center min-w-16">
-                      <div className="font-semibold text-sm">Current</div>
-                      <div className="text-xs text-gray-300">Now</div>
-                    </div>
-                  </div>
+                  <></>
                 )}
               </div>
             </div>
           </div>
 
           {/* Bottom Section: Injury Status + Revenge Game Info */}
-          <div className="mt-6 pt-6 border-t border-borderDefault flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <div className="mt-6 pt-6 border-t text-center items-center border-borderDefault flex flex-col md:flex-row md:justify-between md:items-center gap-4 ">
             <div className={`${status.color} flex items-center gap-2`}>
               <span>{status.icon}</span>
               <span>{status.text}</span>

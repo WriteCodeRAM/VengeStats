@@ -83,6 +83,12 @@ export default function PlayerProfilePage({
     }
   };
 
+  const getVengeScoreBg = (score: number) => {
+    if (score >= 8) return "bg-venge-red";
+    if (score >= 6) return "bg-amber-500";
+    return "bg-blue-500";
+  };
+
   const status = getPlayerStatus();
   const hasStats = player.differentials && player.total_revenge_games >= 2;
 
@@ -187,7 +193,9 @@ export default function PlayerProfilePage({
             {/* Right: Venge Score */}
             <div className="col-span-3 flex justify-end">
               <div className="relative group cursor-help">
-                <div className="bg-venge-red text-white px-6 py-4 rounded-2xl text-center min-w-32">
+                <div
+                  className={`${getVengeScoreBg(player.venge_score)} text-white px-6 py-4 rounded-2xl text-center min-w-32`}
+                >
                   <div className="text-3xl font-bold">{player.venge_score}</div>
                   <div className="text-sm opacity-90">VENGE SCORE</div>
                 </div>
@@ -266,7 +274,9 @@ export default function PlayerProfilePage({
                 </div>
               </div>
 
-              <div className="bg-venge-red text-white px-3 py-2 rounded-xl text-center">
+              <div
+                className={`${getVengeScoreBg(player.venge_score)} text-white px-3 py-2 rounded-xl text-center`}
+              >
                 <div className="text-2xl font-bold">{player.venge_score}</div>
                 <div className="text-xs opacity-90">VENGE SCORE</div>
               </div>

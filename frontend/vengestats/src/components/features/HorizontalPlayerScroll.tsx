@@ -39,10 +39,14 @@ export function HorizontalPlayerScroll({
       </div>
 
       {/* Horizontal Scrolling Container */}
+      {/* Scroll Container */}
       <div className="relative">
-        <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4">
+        <div className="flex flex-col md:flex-row gap-6 overflow-y-auto md:overflow-x-auto h-[400px] md:h-auto scrollbar-hide pb-4">
           {players.map((player) => (
-            <div key={`${player.player_id}`} className="flex-shrink-0 w-80">
+            <div
+              key={`${player.player_id}`}
+              className="flex-shrink-0 w-full md:w-80"
+            >
               <PlayerCard
                 player={{
                   name: player.name,
@@ -63,7 +67,8 @@ export function HorizontalPlayerScroll({
           ))}
         </div>
 
-        <div className="absolute top-0 right-0 h-full w-12 bg-gradient-to-l from-dark-bg to-transparent pointer-events-none" />
+        {/* Gradient overlay for horizontal scroll */}
+        <div className="absolute top-0 right-0 h-full w-12 bg-gradient-to-l from-dark-bg to-transparent pointer-events-none md:block hidden" />
       </div>
     </div>
   );

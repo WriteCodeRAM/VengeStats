@@ -243,14 +243,14 @@ export default function NFLPlayerProfilePage({
                 <div className="flex flex-col gap-2">
                   <span
                     className={`${getPositionColor(
-                      player.position
+                      player.position,
                     )} text-2xl font-bold`}
                   >
                     {player.position}
                   </span>
                   <span
                     className={`px-3 py-1 rounded-lg text-sm font-semibold ${getUsageTierBadge(
-                      player.usage_tier
+                      player.usage_tier,
                     )}`}
                   >
                     {player.usage_tier}
@@ -318,14 +318,14 @@ export default function NFLPlayerProfilePage({
               <div className="flex items-center justify-center gap-3">
                 <span
                   className={`${getPositionColor(
-                    player.position
+                    player.position,
                   )} text-xl font-bold`}
                 >
                   {player.position}
                 </span>
                 <span
                   className={`px-2 py-1 rounded text-xs font-semibold ${getUsageTierBadge(
-                    player.usage_tier
+                    player.usage_tier,
                   )}`}
                 >
                   {player.usage_tier}
@@ -396,7 +396,7 @@ export default function NFLPlayerProfilePage({
             <div className="text-text-secondary text-sm">
               {player.total_revenge_games > 0
                 ? `${player.total_revenge_games + 1}${getOrdinalSuffix(
-                    player.total_revenge_games + 1
+                    player.total_revenge_games + 1,
                   )} revenge game against ${player.former_team_name}`
                 : `First revenge game against ${player.former_team_name}`}
             </div>
@@ -670,8 +670,8 @@ function DifferentialItem({ label, value }: { label: string; value: number }) {
           isPositive
             ? "text-green-400"
             : isNegative
-            ? "text-red-400"
-            : "text-text-secondary"
+              ? "text-red-400"
+              : "text-text-secondary"
         }`}
       >
         {isPositive ? "+" : ""}

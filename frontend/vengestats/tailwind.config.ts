@@ -8,15 +8,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        colors: {
-          "venge-red": "#E63946",
-          "dark-bg": "#0A0E1A",
-          "dark-card": "#1A1F2E",
-          "text-primary": "#FFFFFF",
-          // Flatten everything, no nested objects
-        },
+        "venge-red": "#BE181A",
+        "dark-bg": "#09153F",
+        "dark-card": "#1A1F2E",
+        "text-primary": "#FFFFFF",
+        // Flatten everything, no nested objects
       },
-
       fontFamily: {
         sora: ["Sora", "sans-serif"],
       },

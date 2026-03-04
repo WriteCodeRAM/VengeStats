@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -37,11 +38,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
       !player.injury_status ||
       player.injury_status.toLowerCase() === "healthy"
     ) {
-      return {
-        text: "Active",
-        color: "text-green-400",
-        icon: "✓",
-      };
+      return { text: "Active", color: "text-green-400", icon: "✓" };
     } else {
       return {
         text: player.injury_status,
@@ -58,12 +55,80 @@ export function PlayerCard({ player }: PlayerCardProps) {
       className="bg-dark-card border-borderDefault hover:bg-dark-hover transition-all duration-300 cursor-pointer"
       onClick={handleClick}
     >
-      <CardContent className="p-6">
+      {/* ── MOBILE LAYOUT (< md) ── */}
+      <CardContent className="p-3 md:hidden">
+        {/* Row 1: logos + player name + venge score */}
+        <div className="flex items-center gap-2">
+          {/* Team logos */}
+          <div className="flex items-center gap-1 shrink-0">
+            <Image
+              src={`/nba_logos/${player.current_team_name}.png`}
+              alt={player.current_team_name}
+              width={24}
+              height={24}
+              className="rounded-sm"
+            />
+            <span className="text-text-secondary text-xs">vs</span>
+            <Image
+              src={`/nba_logos/${player.former_team_abbr}.png`}
+              alt={player.former_team_abbr}
+              width={24}
+              height={24}
+              className="rounded-sm"
+            />
+          </div>
+
+          {/* Player name */}
+          <div className="flex-1 min-w-0">
+            <div className="text-white font-semibold text-sm truncate">
+              {player.name}
+            </div>
+          </div>
+
+          {/* Venge score */}
+          <Badge
+            className={`${getVengeScoreBg(player.venge_score)} text-white shrink-0`}
+          >
+            {player.venge_score}
+          </Badge>
+        </div>
+
+        {/* Row 2: record */}
+        <div className="flex items-center justify-between gap-3 mt-2 pt-2 border-t border-borderDefault">
+          <div className="text-xs flex items-center gap-1 text-text-secondary uppercase tracking-wide">
+            Record
+            <div className="text-sm font-bold text-text-primary">
+              {player.record}
+            </div>
+          </div>
+          <div className={`${status.color} text-xs flex items-center gap-0.5`}>
+            <span>{status.icon}</span>
+            <span>{status.text}</span>
+          </div>
+        </div>
+      </CardContent>
+
+      {/* ── DESKTOP / TABLET LAYOUT (≥ md) — unchanged ── */}
+      <CardContent className="p-6 hidden md:block">
         {/* header with team matchup and venge score */}
         <div className="flex justify-between items-center mb-4">
-          <span className="text-white font-semibold">
-            {player.current_team_name || "TBD"} vs {player.former_team_abbr}
-          </span>
+          <div className="flex items-center gap-2">
+            <Image
+              src={`/nba_logos/${player.current_team_name}.png`}
+              alt={player.current_team_name ?? "current team"}
+              width={35}
+              height={35}
+              className="rounded-sm"
+            />
+            <span className="text-text-secondary text-sm">vs</span>
+            <Image
+              src={`/nba_logos/${player.former_team_abbr}.png`}
+              alt={player.former_team_abbr ?? "former team"}
+              width={35}
+              height={35}
+              className="rounded-sm"
+            />
+          </div>
           <Badge
             className={`${getVengeScoreBg(player.venge_score)} text-white`}
           >

@@ -312,7 +312,7 @@ export default function PlayerProfilePage({
                           <div className="font-semibold text-sm">
                             <Image
                               src={`/nba_logos/${stint.team_abbr}.png`}
-                              alt="team logo"
+                              alt={`${stint.team_abbr} logo`}
                               width={50}
                               height={50}
                             />

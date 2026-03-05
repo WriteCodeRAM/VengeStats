@@ -304,7 +304,7 @@ export default function PlayerProfilePage({
                 }`}
               >
                 {player.history && player.history.length > 0 ? (
-                  player.history.map((stint, index) => (
+                  filteredHistory.map((stint, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-3 flex-shrink-0"
@@ -323,7 +323,7 @@ export default function PlayerProfilePage({
                       </div>
 
                       {/* Arrow between teams */}
-                      {index < player.history.length - 1 && (
+                      {index < filteredHistory.length - 1 && (
                         <div className="text-text-secondary flex-shrink-0 text-sm">
                           →
                         </div>

@@ -89,6 +89,11 @@ export default function PlayerProfilePage({
     return "bg-blue-500";
   };
 
+  const filteredHistory = player.history?.filter(
+    (stint, index, arr) =>
+      index === 0 || stint.team_abbr !== arr[index - 1].team_abbr,
+  );
+
   const status = getPlayerStatus();
   const hasStats = player.differentials && player.total_revenge_games >= 2;
 
@@ -134,36 +139,33 @@ export default function PlayerProfilePage({
                 <div className="text-text-secondary text-sm font-semibold mb-3">
                   CAREER TIMELINE
                 </div>
+
                 <div
                   className={`flex items-center gap-4 ${
-                    player.history && player.history.length > 4
+                    filteredHistory && filteredHistory.length > 4
                       ? "justify-start overflow-x-auto pb-2 max-w-lg mx-auto scrollbar-hide"
                       : "justify-center"
                   }`}
                 >
-                  {player.history && player.history.length > 0 ? (
-                    player.history.map((stint, index) => (
+                  {filteredHistory && filteredHistory.length > 0 ? (
+                    filteredHistory.map((stint, index) => (
                       <div
                         key={index}
                         className="flex items-center gap-4 flex-shrink-0"
                       >
                         <div className="relative group cursor-pointer">
-                          <div>
-                            <div className="font-semibold">
-                              <Image
-                                src={`/nba_logos/${stint.team_abbr}.png`}
-                                alt="team logo"
-                                width={50}
-                                height={50}
-                              />
-                            </div>
+                          <div className="font-semibold">
+                            <Image
+                              src={`/nba_logos/${stint.team_abbr}.png`}
+                              alt="team logo"
+                              width={50}
+                              height={50}
+                            />
                           </div>
-
-                          {/* Hover Tooltip removed till data is consistent */}
                         </div>
 
                         {/* Arrow between teams */}
-                        {index < player.history.length - 1 && (
+                        {index < filteredHistory.length - 1 && (
                           <div className="text-text-secondary flex-shrink-0">
                             →
                           </div>

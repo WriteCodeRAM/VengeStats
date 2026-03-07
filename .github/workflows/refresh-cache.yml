@@ -20,8 +20,8 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "VengeStats updated successfully!"
-          to: your@email.com
-          from: your@email.com
+          to: ${{ secrets.EMAIL_USERNAME }}
+          from: ${{ secrets.EMAIL_USERNAME }}
           body: "Nightly cache refresh completed successfully."
 
       - name: Send failure email
@@ -33,6 +33,6 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "VengeStats cache refresh FAILED"
-          to: your@email.com
-          from: your@email.com
+          to: ${{ secrets.EMAIL_USERNAME }}
+          from: ${{ secrets.EMAIL_USERNAME }}
           body: "Nightly cache refresh failed. Check Actions logs."

@@ -13,12 +13,15 @@ from schemas.revenge_types import EnrichedNBARevengePlayer
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
     # revenge_games = get_nba_schedule()
     revenge_games = [
-    ["Minnesota Timberwolves", "Detroit Pistons"],
-    ["Phoenix Suns", "Charlotte Hornets"],
-    ["Los Angeles Lakers", "Oklahoma City Thunder"],
-    ["Cleveland Cavaliers", "Golden State Warriors"],
-    ["New Orleans Pelicans", "Portland Trail Blazers"],
-    ["San Antonio Spurs", "LA Clippers"]
+    ["Indiana Pacers", "Charlotte Hornets"],
+    ["Minnesota Timberwolves", "Philadelphia 76ers"],
+    ["Atlanta Hawks", "Brooklyn Nets"],
+    ["Chicago Bulls", "New York Knicks"],
+    ["Utah Jazz", "Houston Rockets"],
+    ["Toronto Raptors", "Memphis Grizzlies"],
+    ["Boston Celtics", "Milwaukee Bucks"],
+    ["Orlando Magic", "Dallas Mavericks"],
+    ["New Orleans Pelicans", "Sacramento Kings"]
 ]
     matchups = [] 
 

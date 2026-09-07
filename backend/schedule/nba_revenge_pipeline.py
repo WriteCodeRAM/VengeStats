@@ -3,45 +3,51 @@ from db.queries.revenge_games import get_nba_revenge_games
 from scrapers.injury_scrapers import get_nba_injuries
 from db.venge_data import calculate_nba_venge_score
 from nba_utils.utils.data_fetcher import get_fair_comparison
-from nba_utils.utils.player_utils import search_player
+from nba_utils.utils.player_utils import search_player, build_espn_athlete_id_map, _norm
 from db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name, team_full_name_to_id, get_current_team_id
 from db.queries.nba.players import get_total_games_played_for_team, get_player_career_history
-import time
 from typing import List
 from schemas.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
-    revenge_games = get_nba_schedule()
-    matchups = [] 
-
-    for away, home in revenge_games:
-        matchups.append([team_full_name_to_id[away], team_full_name_to_id[home]])
+    # NBA 2026-27 Opening Night, Oct 20, 2026 (NBC tripleheader)
+    # NYK hosts PHI as defending champions (Knicks won 2025-26 title)
+    # Format: [away_team_id, home_team_id] using internal team IDs
+    matchups = [
+        [2, 9],   # BOS @ DET  (3 PM ET)
+        [23, 20], # PHI @ NYK  (7 PM ET, LeBron in NYC, banner night)
+        [21, 27], # OKC @ SAS  (9:30 PM ET)
+    ]
 
     revenge_games = get_nba_revenge_games(matchups)
     updated_games = get_nba_injuries(revenge_games)
-        
+
+    # Build ESPN athlete ID map once for all players
+    espn_id_map = build_espn_athlete_id_map()
+
     enriched_games = []
-    
+
     # player [0] player name
     # player[1] former team full name
     # player[2] injury status
-    # player[3] = db player id 
-    # player[4] opponent team id 
+    # player[3] = db player id
+    # player[4] opponent team id
     for player in updated_games:
         # gonna include injured players but have an asterisk on the frontend 
         if player[2] == "Out":  # Skip injured players
             continue
 
         
-        time.sleep(5)
         current_team_id = get_current_team_id(player[3])
-        nba_api_id = search_player(player[0])["id"]
+        player_result = search_player(player[0])
+        nba_api_id = player_result["id"] if player_result else None
+        espn_athlete_id = espn_id_map.get(_norm(player[0]))
         former_team_abbr = team_id_to_abbr[player[4]]
         former_team_name = team_id_to_full_name[player[4]]
         current_team_name = team_id_to_full_name[current_team_id]
         current_team_abrev = team_id_to_abbr[current_team_id]
         
-        revenge_data, nonrevenge_data = get_fair_comparison(nba_api_id, former_team_abbr, player[6])
+        revenge_data, nonrevenge_data = get_fair_comparison(espn_athlete_id, former_team_abbr, player[6])
         revenge_score, differentials = calculate_nba_venge_score(player[3], player[0], player[4], revenge_data, nonrevenge_data, player[7])
         
 

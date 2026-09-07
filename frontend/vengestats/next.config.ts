@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["cdn.nba.com"],
+    domains: ["cdn.nba.com", "a.espncdn.com"],
   },
   typescript: {
     ignoreBuildErrors: true,

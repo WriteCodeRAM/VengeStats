@@ -17,6 +17,7 @@ interface PlayerCardProps {
     record: string;
     total_revenge_games: number;
     current_team_name: string;
+    current_team_abbr?: string;
     league: string;
   };
 }
@@ -50,6 +51,16 @@ export function PlayerCard({ player }: PlayerCardProps) {
 
   const status = getPlayerStatus();
 
+  const isNFL = player.league?.toLowerCase() === "nfl";
+
+  const getTeamLogoUrl = (teamAbbr: string, useAbbr?: string) => {
+    if (isNFL) {
+      const abbr = (useAbbr || teamAbbr)?.toLowerCase();
+      return `https://a.espncdn.com/i/teamlogos/nfl/500/${abbr}.png`;
+    }
+    return `/nba_logos/${teamAbbr}.png`;
+  };
+
   return (
     <Card
       className="bg-dark-card border-borderDefault hover:bg-dark-hover transition-all duration-300 cursor-pointer"
@@ -62,7 +73,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
           {/* Team logos */}
           <div className="flex items-center gap-1 shrink-0">
             <Image
-              src={`/nba_logos/${player.current_team_name}.png`}
+              src={getTeamLogoUrl(player.current_team_name, player.current_team_abbr)}
               alt={player.current_team_name}
               width={24}
               height={24}
@@ -70,7 +81,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
             />
             <span className="text-text-secondary text-xs">vs</span>
             <Image
-              src={`/nba_logos/${player.former_team_abbr}.png`}
+              src={getTeamLogoUrl(player.former_team_abbr)}
               alt={player.former_team_abbr}
               width={24}
               height={24}
@@ -114,7 +125,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             <Image
-              src={`/nba_logos/${player.current_team_name}.png`}
+              src={getTeamLogoUrl(player.current_team_name, player.current_team_abbr)}
               alt={player.current_team_name ?? "current team"}
               width={35}
               height={35}
@@ -122,7 +133,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
             />
             <span className="text-text-secondary text-sm">vs</span>
             <Image
-              src={`/nba_logos/${player.former_team_abbr}.png`}
+              src={getTeamLogoUrl(player.former_team_abbr)}
               alt={player.former_team_abbr ?? "former team"}
               width={35}
               height={35}

@@ -2,21 +2,31 @@ import nfl_data_py as nfl
 import pandas as pd
 from datetime import datetime
 
+MAX_AVAILABLE_SEASON = 2024  # nfl_data_py lags; update when new season data is confirmed
+
+
 def get_nfl_stats(player_id, opponent_team_abbr=None, after_season=None):
     """
     Get NFL player game stats filtered by opponent and season using nfl_data_py
-    
+
     Args:
         player_id: nfl_data_py player ID (gsis_id)
         opponent_team_abbr: Team abbreviation to filter by as OPPONENT (e.g., 'KC', 'MIA')
         after_season: Season year to start from (e.g., 2022)
     """
+    # Cap to the last confirmed available season so we don't 404 on the current year
+    end_season = MAX_AVAILABLE_SEASON
+
     if after_season:
-        seasons = list(range(after_season, datetime.now().year + 1))
+        start_season = min(int(after_season), end_season)
     else:
-        # Default to current season
-        current_year = datetime.now().year
-        seasons = [current_year]
+        # No departure year: pull last 5 seasons as a reasonable default
+        start_season = end_season - 4
+
+    if start_season > end_season:
+        return pd.DataFrame()
+
+    seasons = list(range(start_season, end_season + 1))
     
     all_games = []
     

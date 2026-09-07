@@ -60,6 +60,7 @@ export function HorizontalPlayerScroll({
                   record: player.record,
                   total_revenge_games: player.total_revenge_games,
                   current_team_name: player.current_team_name,
+                  current_team_abbr: player.current_team_abbr,
                   league: player.league,
                 }}
               />

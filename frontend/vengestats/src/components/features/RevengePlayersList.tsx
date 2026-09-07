@@ -23,6 +23,7 @@ export function RevengePlayersList() {
         }
 
         const data = await response.json();
+        console.log(data);
         const nbaPlayers = data.nba_revenge_matchups || [];
         const nflPlayers = data.nfl_revenge_matchups || [];
         const sortedNBAPlayers = nbaPlayers.sort(
@@ -75,13 +76,17 @@ export function RevengePlayersList() {
           nbaPlayers.length > 1 || nbaPlayers.length == 0
             ? "matchups"
             : "matchup"
-        } in the NBA today`}
+        } on Opening Night`}
         players={nbaPlayers}
       />
       {/* NFL Section */}
       <HorizontalPlayerScroll
         title="NFL Revenge Games 🏈"
-        subtitle={`NFL Revenge Game Tracking Will Return September, 9, 2026!`}
+        subtitle={`${nflPlayers.length} revenge ${
+          nflPlayers.length > 1 || nflPlayers.length == 0
+            ? "matchups"
+            : "matchup"
+        } in Week 1`}
         players={nflPlayers}
       />
     </div>

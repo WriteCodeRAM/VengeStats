@@ -1,6 +1,10 @@
+import unicodedata
 from db.database import get_connection
 from db.queries.nba.teams import team_id_to_abbr, team_id_to_full_name
 from psycopg2 import sql
+
+def _norm(s: str) -> str:
+    return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn').lower()
 
 def find_player_by_name_globally(first_name: str, last_name: str):
     """Search entire database for player by name"""
@@ -10,6 +14,25 @@ def find_player_by_name_globally(first_name: str, last_name: str):
             cursor.execute(query, (first_name.strip(), last_name.strip()))
             result = cursor.fetchone()
             return result if result else None
+
+def find_player_by_name_normalized(first_name: str, last_name: str):
+    """Accent-insensitive fallback for find_player_by_name_globally.
+    Searches by first name (exact) then normalizes last name in Python to handle
+    cases where the API strips diacritics (e.g. ESPN 'Doncic' vs DB 'Dončić').
+    """
+    norm_first = _norm(first_name.strip())
+    norm_last = _norm(last_name.strip())
+
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, current_team_id, first_name, last_name FROM nba_players",
+                ()
+            )
+            for pid, team_id, db_first, db_last in cursor.fetchall():
+                if _norm(db_first) == norm_first and _norm(db_last) == norm_last:
+                    return (pid, team_id)
+    return None
 
 def insert_new_player(first_name: str, last_name: str, current_team_id: int, nba_api_player_id: int = None) -> int:
     """Insert a completely new player with NBA API ID"""

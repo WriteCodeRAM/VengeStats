@@ -3,6 +3,37 @@ from typing import List, Tuple
 from schemas.revenge_types import NFLRevengePlayer, NBARevengePlayer
 from db.queries.nfl.teams import NFL_TEAM_ID_TO_ABBR 
 
+WNBA_REVENGE_GAME_QUERY = """
+SELECT DISTINCT
+    p.id                        AS player_id,
+    p.first_name,
+    p.last_name,
+    curr_team.name              AS current_team_name,
+    former_team.name            AS former_team_name,
+    former_team.id              AS opponent_team_id,
+    pts.last_game_date          AS most_recent_departure,
+    pts.departure_method,
+    p.api_player_id,
+    curr_team.abbreviation      AS current_team_abbr,
+    former_team.abbreviation    AS former_team_abbr
+FROM wnba_players p
+JOIN wnba_teams curr_team ON p.current_team_id = curr_team.id
+JOIN (
+    SELECT DISTINCT ON (player_id, team_id)
+        player_id,
+        team_id,
+        last_game_date,
+        departure_method
+    FROM wnba_player_stints
+    ORDER BY player_id, team_id, last_game_date DESC
+) pts ON p.id = pts.player_id AND pts.team_id != p.current_team_id
+JOIN wnba_teams former_team ON pts.team_id = former_team.id
+WHERE
+    (p.current_team_id = %s AND pts.team_id = %s)
+    OR
+    (p.current_team_id = %s AND pts.team_id = %s);
+"""
+
 NBA_REVENGE_GAME_QUERY = """
 SELECT DISTINCT 
     p.id AS player_id, 
@@ -22,7 +53,7 @@ JOIN (
         last_game_date,
         departure_method
     FROM nba_player_team_stints_api
-    ORDER BY player_id, team_id, last_game_date DESC
+    ORDER BY player_id, team_id, last_game_date DESC NULLS LAST
 ) pts ON p.id = pts.player_id AND pts.team_id != p.current_team_id
 JOIN teams former_team ON pts.team_id = former_team.id
 WHERE 
@@ -31,7 +62,7 @@ WHERE
     (p.current_team_id = %s AND pts.team_id = %s);
 """
 
-NFL_REVENGE_GAME_QUERY =NFL_REVENGE_GAME_QUERY = """
+NFL_REVENGE_GAME_QUERY = """
 WITH recent_stints AS (
     SELECT 
         pts.*,
@@ -64,19 +95,22 @@ FROM nfl_players p
 JOIN recent_stints pts ON p.id = pts.player_id
 JOIN nfl_teams former_team ON pts.team_id = former_team.id
 JOIN nfl_teams curr_team ON p.current_team_id = curr_team.id
-WHERE 
+WHERE
     p.is_active = true
     AND p.position IN ('QB', 'RB', 'TE', 'WR')
-    AND pts.team_id != p.current_team_id  -- Player must have played for a different team
+    AND pts.team_id != p.current_team_id
+    AND pts.games_played >= 8
+    AND p.usage_tier IN ('STARTER', 'ROTATIONAL')
     AND (
         (p.current_team_id = %s AND pts.team_id = %s)
-        OR 
+        OR
         (p.current_team_id = %s AND pts.team_id = %s)
     )
-GROUP BY p.id, p.nfl_data_py_player_id, p.first_name, p.last_name, p.display_name, p.current_team_id, 
+GROUP BY p.id, p.nfl_data_py_player_id, p.first_name, p.last_name, p.display_name, p.current_team_id,
          p.position, p.usage_tier, p.years_exp, p.draft_team, p.pro_bowl_selections,
          p.all_pro_selections, former_team.team_name, former_team.team_abbreviation, former_team.id,
-         curr_team.team_name, curr_team.team_abbreviation;
+         curr_team.team_name, curr_team.team_abbreviation
+HAVING SUM(pts.games_played) >= 8;
 """
 
 def get_nfl_player_stint_history(player_id: int) -> List[List[int]]:
@@ -174,6 +208,26 @@ def get_nba_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengePla
                         player[7]                    # departure method
                     ])
             return revenge_games
+
+def get_wnba_revenge_games(conn, matchups: List[Tuple[int, int]]) -> List[tuple]:
+    """
+    Given a list of (away_team_id, home_team_id) matchups using internal DB team IDs,
+    returns all players with revenge game situations across all matchups.
+ 
+    Each returned row:
+        (player_id, first_name, last_name, current_team_name, former_team_name,
+         opponent_team_id, most_recent_departure, departure_method,
+         api_player_id, current_team_abbr, former_team_abbr)
+    """
+    results = []
+ 
+    with conn.cursor() as cur:
+        for away_id, home_id in matchups:
+            cur.execute(WNBA_REVENGE_GAME_QUERY, (away_id, home_id, home_id, away_id))
+            rows = cur.fetchall()
+            results.extend(rows)
+ 
+    return results
 
 def check_first_revenge_game(player_id: int, team_id: int) -> bool:
     """Checks if a player's first revenge game against a team is recorded."""

@@ -1,15 +1,18 @@
 from typing import Set, Tuple, List, Optional
 import time
-from db.queries.nba.teams import team_id_to_nba_api_id
+import requests
+from nba_utils.utils.player_utils import TEAM_ID_TO_ESPN_ID, ESPN_ROSTER_URL
 from db.queries.nba.players import (
-    find_player_by_name_globally, 
-    move_player_to_team, 
+    find_player_by_name_globally,
+    move_player_to_team,
     move_player_to_free_agency,
     insert_new_player,
     get_player_prev_team
 )
 from db.database import get_connection
 from psycopg2 import sql
+
+_ESPN_HEADERS = {'User-Agent': 'Mozilla/5.0'}
 
 def mark_player_needs_stint_refresh(player_id: int):
     """Mark that this player's stints need to be resynced"""
@@ -22,27 +25,30 @@ def mark_player_needs_stint_refresh(player_id: int):
             """, (player_id,))
             conn.commit()
 
-def get_team_roster_from_api(team_id, season='2025-26'):
-    """Get current roster using NBA API with automatic season detection"""
-    from nba_api.stats.endpoints import CommonTeamRoster
-    
+def get_team_roster_from_api(espn_team_id):
+    """Get current roster from ESPN API"""
     try:
-        print(f"Fetching roster for NBA team {team_id} (season: {season})...")
-        roster = CommonTeamRoster(team_id=team_id, season=season)
-        df = roster.get_data_frames()[0]
-        
+        url = ESPN_ROSTER_URL.format(espn_team_id)
+        print(f"Fetching roster from ESPN for team {espn_team_id}...")
+        r = requests.get(url, headers=_ESPN_HEADERS, timeout=15)
+        if r.status_code != 200:
+            print(f"ESPN returned {r.status_code}")
+            return []
+        data = r.json()
         players = []
-        for _, player in df.iterrows():
+        for athlete in data.get('athletes', []):
+            full_name = athlete.get('fullName', '')
+            parts = full_name.split(' ', 1)
+            first_name = parts[0] if parts else ''
+            last_name = parts[1] if len(parts) > 1 else ''
             players.append({
-                'player_id': player['PLAYER_ID'],
-                'first_name': player['PLAYER'].split()[0],
-                'last_name': ' '.join(player['PLAYER'].split()[1:]),
-                'full_name': player['PLAYER']
+                'player_id': athlete.get('id'),
+                'first_name': first_name,
+                'last_name': last_name,
+                'full_name': full_name,
             })
-        
         print(f"Found {len(players)} players")
         return players
-        
     except Exception as e:
         print(f"Error fetching roster: {e}")
         return []
@@ -165,12 +171,12 @@ def sync_team_roster(team_id: int) -> dict:
     original_count = len(db_roster_set)
     
 
-    nba_api_team_id = team_id_to_nba_api_id.get(team_id)
-    if not nba_api_team_id:
-        print(f"No NBA API team ID for {team_id}")
+    espn_team_id = TEAM_ID_TO_ESPN_ID.get(team_id)
+    if not espn_team_id:
+        print(f"No ESPN team ID for internal team {team_id}")
         return {"success": False}
-    
-    api_roster = get_team_roster_from_api(nba_api_team_id)
+
+    api_roster = get_team_roster_from_api(espn_team_id)
     
     if not api_roster:
         print("Could not get API roster")

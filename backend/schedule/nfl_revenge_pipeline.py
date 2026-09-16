@@ -11,8 +11,8 @@ def get_weekly_revenge_matchups():
         # Thursday Sept 17
         [ "8",  "2"],  # DET @ BUF  (Thursday Night Football)
         # Sunday Sept 20
-        [ "3",  "1"],  # CAR @ ATL
-        ["16", "18"],  # MIN @ CHI
+        ["29",  "1"],  # CAR @ ATL
+        ["16",  "3"],  # MIN @ CHI
         ["21", "10"],  # PHI @ TEN
         ["23", "17"],  # PIT @ NE
         [ "9", "20"],  # GB  @ NYJ

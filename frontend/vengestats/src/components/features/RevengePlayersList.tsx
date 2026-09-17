@@ -23,7 +23,6 @@ export function RevengePlayersList() {
         }
 
         const data = await response.json();
-        console.log(data);
         const nbaPlayers = data.nba_revenge_matchups || [];
         const nflPlayers = data.nfl_revenge_matchups || [];
         const sortedNBAPlayers = nbaPlayers.sort(

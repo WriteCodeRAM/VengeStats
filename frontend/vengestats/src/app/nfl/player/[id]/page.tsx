@@ -72,6 +72,8 @@ export default function NFLPlayerProfilePage({
         }
 
         const playerData = await response.json();
+        console.log("NFL player history:", playerData.history);
+        console.log("NFL player data:", playerData);
         setPlayer(playerData);
       } catch (err) {
         console.error("Failed to fetch NFL player:", err);
@@ -105,6 +107,12 @@ export default function NFLPlayerProfilePage({
       </div>
     );
   }
+
+  const normalizedHistory = (player.history || []).map((stint: any) =>
+    Array.isArray(stint)
+      ? { team_abbr: stint[0] as string, start_year: stint[1] as number, end_year: stint[2] as number | null }
+      : stint
+  ).filter((s: any) => s.team_abbr);
 
   const getPlayerStatus = () => {
     if (!player.injury_status || player.injury_status === "Healthy") {
@@ -282,13 +290,13 @@ export default function NFLPlayerProfilePage({
                 </div>
                 <div
                   className={`flex items-center gap-4 ${
-                    player.history && player.history.length > 4
+                    normalizedHistory.length > 4
                       ? "justify-start overflow-x-auto pb-2 max-w-lg mx-auto scrollbar-hide"
                       : "justify-center"
                   }`}
                 >
-                  {player.history && player.history.length > 0 ? (
-                    player.history.filter((s) => s.team_abbr).map((stint, index, arr) => (
+                  {normalizedHistory.length > 0 ? (
+                    normalizedHistory.map((stint, index) => (
                       <div key={index} className="flex items-center gap-4 flex-shrink-0">
                         <div className="flex flex-col items-center gap-1">
                           <img
@@ -302,7 +310,7 @@ export default function NFLPlayerProfilePage({
                             {stint.start_year}{stint.end_year ? `–${stint.end_year}` : "+"}
                           </div>
                         </div>
-                        {index < arr.length - 1 && (
+                        {index < normalizedHistory.length - 1 && (
                           <div className="text-text-secondary flex-shrink-0">→</div>
                         )}
                       </div>
@@ -404,11 +412,11 @@ export default function NFLPlayerProfilePage({
               </div>
               <div
                 className={`flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide ${
-                  player.history && player.history.length < 4 ? "justify-center" : ""
+                  normalizedHistory.length < 4 ? "justify-center" : ""
                 }`}
               >
-                {player.history && player.history.length > 0 ? (
-                  player.history.filter((s) => s.team_abbr).map((stint, index, arr) => (
+                {normalizedHistory.length > 0 ? (
+                  normalizedHistory.map((stint, index) => (
                     <div key={index} className="flex items-center gap-3 flex-shrink-0">
                       <div className="flex flex-col items-center gap-1">
                         <img
@@ -422,7 +430,7 @@ export default function NFLPlayerProfilePage({
                           {stint.start_year}{stint.end_year ? `–${stint.end_year}` : "+"}
                         </div>
                       </div>
-                      {index < arr.length - 1 && (
+                      {index < normalizedHistory.length - 1 && (
                         <div className="text-text-secondary flex-shrink-0 text-sm">→</div>
                       )}
                     </div>

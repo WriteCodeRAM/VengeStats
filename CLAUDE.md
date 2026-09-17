@@ -166,6 +166,34 @@ WNBA work was started but paused. The roster fetcher exists (`backend/wnba/roste
 
 During offseason, matchups are **hardcoded** in the pipeline files to showcase the product. Update them before each season opens with the real opening-week slate fetched from ESPN scoreboard API.
 
+### Update cadence (in-season)
+- **NFL**: Update matchups every **Tuesday** for the upcoming week's slate. Hardcode all 16 games in `nfl_revenge_pipeline.py`, commit, push, then hit `POST /cron/refresh-cache/{CACHE_KEY}` to regenerate.
+- **NBA**: Update matchups every **night at midnight**. During the season the matchups should reflect that day's games. Hit the cache refresh endpoint nightly.
+- **Cache refresh endpoint**: `POST https://vengestats-production.up.railway.app/cron/refresh-cache/{CACHE_KEY}` (key is in Railway env vars)
+
+---
+
+## Departure Methods
+
+Every player stint in `nfl_player_stints` and `nba_player_team_stints_api` has a `departure_method` field. This field drives the VengeScore modifier and the tweet copy. **Always look up the real departure story before writing it to the DB.**
+
+### How to update
+```python
+UPDATE nfl_player_stints SET departure_method = 'Released'
+WHERE player_id = (SELECT id FROM nfl_players WHERE display_name = 'Player Name')
+AND team_id = (SELECT id FROM nfl_teams WHERE team_abbreviation = 'XXX');
+```
+
+### Valid values and their meaning
+| Value | Meaning | VengeScore impact |
+|---|---|---|
+| `Released` | Team cut the player, often to sign someone else | +1.0 (most personal) |
+| `Traded` | Team traded the player away | +0.8 |
+| `Free Agent` | Contract expired, player left on own terms | +0.2 |
+| `NULL` | Unknown, needs research | +0.2 (same as FA fallback) |
+
+**Rule**: whenever a player surfaces in a revenge matchup with `departure_method = NULL`, look up the real story (search "[Player] [Team] departure/trade/released/cut") and update the DB before tweeting. Never tweet a departure method you haven't verified.
+
 ---
 
 ## Running Locally
@@ -209,3 +237,31 @@ API base: `http://localhost:8000` (set via `NEXT_PUBLIC_API_URL` env var for pro
 - `nba_player_team_stints_api` is the career stint table. `nba_players.prev_team_id` is derived from it; if they disagree, the stints table wins.
 - `notable_revenge_narratives` in `venge_data.py` uses internal team IDs (not ESPN IDs). Keep this in sync when teams are added.
 - Twitter bot lives in `backend/bot/` and posts on `@VengeStats`. Do not run it locally against the production account without intent.
+
+---
+
+## Tweet Format
+
+### NFL Weekly Revenge Tweet
+Post the top 2 players by VengeScore only. Skip players with mid scores (under ~6.5) unless the narrative is strong.
+
+```
+WEEK {N} NFL REVENGE GAMES 🏈
+
+🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}] — VengeScore: {X.X}
+🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}] — VengeScore: {X.X}
+
+{One punchy line about the top player's narrative. Make it personal.}
+
+#NFLSunday #NFL vengestats.com
+```
+
+**Rules:**
+- Departure method must be verified in DB before posting (see Departure Methods section)
+- VengeScore stands alone per player, never combined or shown as a ratio
+- One narrative line max, focused on the top player
+- Use `#TNF` instead of `#NFLSunday` for Thursday Night Football games
+- `#MNF` for Monday Night Football
+
+### NBA Nightly Revenge Tweet
+Same format, swap NFL emoji for 🏀 and hashtags for `#NBA`.

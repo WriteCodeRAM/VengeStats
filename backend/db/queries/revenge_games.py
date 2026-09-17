@@ -136,10 +136,14 @@ def get_nfl_player_stint_history(player_id: int) -> List[List[int]]:
             
 
 
-            stints = [list(stint) for stint in stints]
-            for stint in stints:
-                stint[0] = NFL_TEAM_ID_TO_ABBR[int(stint[0])]
-            return stints
+            result = []
+            for team_id, season_start, season_end in stints:
+                result.append({
+                    'team_abbr': NFL_TEAM_ID_TO_ABBR[int(team_id)],
+                    'start_year': season_start,
+                    'end_year': season_end,
+                })
+            return result
 
 
 def get_nfl_revenge_games(schedule: List[List[int]]) -> List[NFLRevengePlayer]:

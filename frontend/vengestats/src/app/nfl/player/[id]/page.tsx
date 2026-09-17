@@ -288,7 +288,7 @@ export default function NFLPlayerProfilePage({
                   }`}
                 >
                   {player.history && player.history.length > 0 ? (
-                    player.history.map((stint, index) => (
+                    player.history.filter((s) => s.team_abbr).map((stint, index, arr) => (
                       <div key={index} className="flex items-center gap-4 flex-shrink-0">
                         <div className="flex flex-col items-center gap-1">
                           <img
@@ -302,34 +302,40 @@ export default function NFLPlayerProfilePage({
                             {stint.start_year}{stint.end_year ? `–${stint.end_year}` : "+"}
                           </div>
                         </div>
-                        {index < (player.history?.length ?? 0) - 1 && (
+                        {index < arr.length - 1 && (
                           <div className="text-text-secondary flex-shrink-0">→</div>
                         )}
                       </div>
                     ))
                   ) : (
                     <div className="flex items-center gap-4">
-                      <div className="flex flex-col items-center gap-1">
-                        <img
-                          src={`https://a.espncdn.com/i/teamlogos/nfl/500/${player.former_team_abbr.toLowerCase()}.png`}
-                          alt={player.former_team_abbr}
-                          width={50}
-                          height={50}
-                          className="rounded"
-                        />
-                        <div className="text-xs text-text-secondary">Former</div>
-                      </div>
-                      <div className="text-text-secondary">→</div>
-                      <div className="flex flex-col items-center gap-1">
-                        <img
-                          src={`https://a.espncdn.com/i/teamlogos/nfl/500/${player.current_team_abbr.toLowerCase()}.png`}
-                          alt={player.current_team_abbr}
-                          width={50}
-                          height={50}
-                          className="rounded"
-                        />
-                        <div className="text-xs text-text-secondary">Now</div>
-                      </div>
+                      {player.former_team_abbr && (
+                        <>
+                          <div className="flex flex-col items-center gap-1">
+                            <img
+                              src={`https://a.espncdn.com/i/teamlogos/nfl/500/${player.former_team_abbr.toLowerCase()}.png`}
+                              alt={player.former_team_abbr}
+                              width={50}
+                              height={50}
+                              className="rounded"
+                            />
+                            <div className="text-xs text-text-secondary">Former</div>
+                          </div>
+                          <div className="text-text-secondary">→</div>
+                        </>
+                      )}
+                      {player.current_team_abbr && (
+                        <div className="flex flex-col items-center gap-1">
+                          <img
+                            src={`https://a.espncdn.com/i/teamlogos/nfl/500/${player.current_team_abbr.toLowerCase()}.png`}
+                            alt={player.current_team_abbr}
+                            width={50}
+                            height={50}
+                            className="rounded"
+                          />
+                          <div className="text-xs text-text-secondary">Now</div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -402,7 +408,7 @@ export default function NFLPlayerProfilePage({
                 }`}
               >
                 {player.history && player.history.length > 0 ? (
-                  player.history.map((stint, index) => (
+                  player.history.filter((s) => s.team_abbr).map((stint, index, arr) => (
                     <div key={index} className="flex items-center gap-3 flex-shrink-0">
                       <div className="flex flex-col items-center gap-1">
                         <img
@@ -416,34 +422,40 @@ export default function NFLPlayerProfilePage({
                           {stint.start_year}{stint.end_year ? `–${stint.end_year}` : "+"}
                         </div>
                       </div>
-                      {index < (player.history?.length ?? 0) - 1 && (
+                      {index < arr.length - 1 && (
                         <div className="text-text-secondary flex-shrink-0 text-sm">→</div>
                       )}
                     </div>
                   ))
                 ) : (
                   <>
-                    <div className="flex flex-col items-center gap-1">
-                      <img
-                        src={`https://a.espncdn.com/i/teamlogos/nfl/500/${player.former_team_abbr.toLowerCase()}.png`}
-                        alt={player.former_team_abbr}
-                        width={44}
-                        height={44}
-                        className="rounded"
-                      />
-                      <div className="text-xs text-text-secondary">Former</div>
-                    </div>
-                    <div className="text-text-secondary text-sm">→</div>
-                    <div className="flex flex-col items-center gap-1">
-                      <img
-                        src={`https://a.espncdn.com/i/teamlogos/nfl/500/${player.current_team_abbr.toLowerCase()}.png`}
-                        alt={player.current_team_abbr}
-                        width={44}
-                        height={44}
-                        className="rounded"
-                      />
-                      <div className="text-xs text-text-secondary">Now</div>
-                    </div>
+                    {player.former_team_abbr && (
+                      <>
+                        <div className="flex flex-col items-center gap-1">
+                          <img
+                            src={`https://a.espncdn.com/i/teamlogos/nfl/500/${player.former_team_abbr.toLowerCase()}.png`}
+                            alt={player.former_team_abbr}
+                            width={44}
+                            height={44}
+                            className="rounded"
+                          />
+                          <div className="text-xs text-text-secondary">Former</div>
+                        </div>
+                        <div className="text-text-secondary text-sm">→</div>
+                      </>
+                    )}
+                    {player.current_team_abbr && (
+                      <div className="flex flex-col items-center gap-1">
+                        <img
+                          src={`https://a.espncdn.com/i/teamlogos/nfl/500/${player.current_team_abbr.toLowerCase()}.png`}
+                          alt={player.current_team_abbr}
+                          width={44}
+                          height={44}
+                          className="rounded"
+                        />
+                        <div className="text-xs text-text-secondary">Now</div>
+                      </div>
+                    )}
                   </>
                 )}
               </div>

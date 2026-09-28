@@ -85,7 +85,7 @@ export function RevengePlayersList() {
           nflPlayers.length > 1 || nflPlayers.length == 0
             ? "matchups"
             : "matchup"
-        } in Week 3`}
+        } in Week 4`}
         players={nflPlayers}
       />
     </div>

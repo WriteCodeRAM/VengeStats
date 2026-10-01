@@ -1,7 +1,7 @@
 "use client";
 
 import { PlayerCard } from "./PlayerCard";
-import { RevengePlayer } from "@/types/player";
+import type { RevengePlayer } from "@/types/player";
 
 interface HorizontalPlayerScrollProps {
   title: string;

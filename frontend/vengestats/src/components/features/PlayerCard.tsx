@@ -4,22 +4,10 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+import { RevengePlayer } from "@/types/player";
+
 interface PlayerCardProps {
-  player: {
-    name: string;
-    player_id: number;
-    former_team_abbr: string;
-    former_team_name: string;
-    injury_status: string;
-    venge_score: number;
-    nba_api_id?: number;
-    nfl_data_id?: string;
-    record: string;
-    total_revenge_games: number;
-    current_team_name: string;
-    current_team_abbr?: string;
-    league: string;
-  };
+  player: RevengePlayer;
 }
 
 export function PlayerCard({ player }: PlayerCardProps) {
@@ -106,12 +94,16 @@ export function PlayerCard({ player }: PlayerCardProps) {
 
         {/* Row 2: record */}
         <div className="flex items-center justify-between gap-3 mt-2 pt-2 border-t border-borderDefault">
-          <div className="text-xs flex items-center gap-1 text-text-secondary uppercase tracking-wide">
-            Record
-            <div className="text-sm font-bold text-text-primary">
-              {player.record}
+          {player.record != null ? (
+            <div className="text-xs flex items-center gap-1 text-text-secondary uppercase tracking-wide">
+              Record
+              <div className="text-sm font-bold text-text-primary">
+                {player.record}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-xs text-text-secondary uppercase tracking-wide">2026 Playoffs</div>
+          )}
           <div className={`${status.color} text-xs flex items-center gap-0.5`}>
             <span>{status.icon}</span>
             <span>{status.text}</span>
@@ -167,18 +159,28 @@ export function PlayerCard({ player }: PlayerCardProps) {
 
         {/* stats */}
         <div className="flex gap-6 mb-4">
-          <div className="text-center">
-            <div className="text-lg font-bold text-text-primary">
-              {player.record}
+          {player.record != null && (
+            <div className="text-center">
+              <div className="text-lg font-bold text-text-primary">
+                {player.record}
+              </div>
+              <div className="text-xs text-text-secondary">RECORD</div>
             </div>
-            <div className="text-xs text-text-secondary">RECORD</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-text-primary">
-              {player.total_revenge_games}
+          )}
+          {player.total_revenge_games != null && (
+            <div className="text-center">
+              <div className="text-lg font-bold text-text-primary">
+                {player.total_revenge_games}
+              </div>
+              <div className="text-xs text-text-secondary">REVENGE GAMES</div>
             </div>
-            <div className="text-xs text-text-secondary">REVENGE GAMES</div>
-          </div>
+          )}
+          {player.record == null && (
+            <div className="text-center">
+              <div className="text-lg font-bold text-text-primary">2026</div>
+              <div className="text-xs text-text-secondary">PLAYOFFS</div>
+            </div>
+          )}
         </div>
 
         {/* player status */}

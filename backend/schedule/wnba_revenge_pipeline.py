@@ -23,6 +23,32 @@ def _get_games_for_team(player_id: int, team_id: int) -> int:
             return cursor.fetchone()[0]
 
 
+def _get_career_history(player_id: int) -> list:
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT t.abbreviation, t.name,
+                       EXTRACT(YEAR FROM s.first_game_date)::int,
+                       EXTRACT(YEAR FROM s.last_game_date)::int,
+                       s.games_played, s.is_current
+                FROM wnba_player_stints s
+                JOIN wnba_teams t ON t.id = s.team_id
+                WHERE s.player_id = %s
+                ORDER BY s.first_game_date
+            """, (player_id,))
+            return [
+                {
+                    'team_abbr': row[0],
+                    'team_full_name': row[1],
+                    'start_year': row[2],
+                    'end_year': row[3],
+                    'games_played': row[4],
+                    'is_current': row[5],
+                }
+                for row in cursor.fetchall()
+            ]
+
+
 def _get_prev_team_id(player_id: int) -> int | None:
     with get_connection() as conn:
         with conn.cursor() as cursor:
@@ -77,6 +103,8 @@ def get_wnba_revenge_matchups():
             departure_method=departure_method,
         )
 
+        history = _get_career_history(player_id)
+
         enriched.append({
             'player_id': player_id,
             'name': name,
@@ -90,7 +118,8 @@ def get_wnba_revenge_matchups():
             'departure_method': departure_method,
             'games_for_former': games_for_former,
             'career_games': career_games,
-            'departure_date': most_recent_departure,
+            'departure_date': str(most_recent_departure) if most_recent_departure else None,
+            'history': history,
         })
 
     return enriched

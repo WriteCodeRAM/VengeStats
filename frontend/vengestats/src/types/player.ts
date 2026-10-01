@@ -43,21 +43,49 @@ export interface NBARevengePlayer {
 export interface NFLRevengePlayer {
   player_id: number;
   nfl_data_id: string;
-  player_name: string;
-  display_name: string;
-  current_team_id: number;
+  name: string;
   position: string;
-  usage_tier: string;
-  years_exp: number | null;
-  draft_team: string | null;
-  pro_bowl_selections: number | null;
-  all_pro_selections: number | null;
+  former_team_abbr: string;
   former_team_name: string;
-  former_team_id: number;
-  season_start: number;
-  departure_year: number;
-  total_games_played_for_team: number;
+  current_team_name: string;
+  current_team_abbr?: string;
+  record: string;
+  total_revenge_games: number;
+  games_played: number;
   venge_score: number;
+  league: string;
+  // legacy / profile-only fields
+  player_name?: string;
+  display_name?: string;
+  current_team_id?: number;
+  usage_tier?: string;
+  years_exp?: number | null;
+  draft_team?: string | null;
+  pro_bowl_selections?: number | null;
+  all_pro_selections?: number | null;
+  former_team_id?: number;
+  season_start?: number;
+  departure_year?: number;
+  total_games_played_for_team?: number;
+  injury_status?: string | null;
+}
+
+// Minimal shared shape for all leagues -- used by HorizontalPlayerScroll / PlayerCard
+export interface RevengePlayer {
+  player_id: number;
+  name: string;
+  former_team_abbr: string;
+  former_team_name: string;
+  current_team_name: string;
+  current_team_abbr?: string;
+  venge_score: number;
+  league: string;
+  // NBA / NFL only
+  nba_api_id?: number;
+  nfl_data_id?: string;
+  injury_status?: string | null;
+  record?: string;
+  total_revenge_games?: number;
 }
 
 export interface WNBARevengePlayer {

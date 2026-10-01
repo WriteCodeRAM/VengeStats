@@ -13,7 +13,7 @@ SELECT DISTINCT
     former_team.id              AS opponent_team_id,
     pts.last_game_date          AS most_recent_departure,
     pts.departure_method,
-    p.api_player_id,
+    p.espn_athlete_id,
     curr_team.abbreviation      AS current_team_abbr,
     former_team.abbreviation    AS former_team_abbr
 FROM wnba_players p
@@ -213,25 +213,24 @@ def get_nba_revenge_games(schedule: List[Tuple[int, int]]) -> List[NBARevengePla
                     ])
             return revenge_games
 
-def get_wnba_revenge_games(conn, matchups: List[Tuple[int, int]]) -> List[tuple]:
+def get_wnba_revenge_games(matchups: List[Tuple[int, int]]) -> List[tuple]:
     """
     Given a list of (away_team_id, home_team_id) matchups using internal DB team IDs,
     returns all players with revenge game situations across all matchups.
- 
+
     Each returned row:
         (player_id, first_name, last_name, current_team_name, former_team_name,
          opponent_team_id, most_recent_departure, departure_method,
-         api_player_id, current_team_abbr, former_team_abbr)
+         espn_athlete_id, current_team_abbr, former_team_abbr)
     """
-    results = []
- 
-    with conn.cursor() as cur:
-        for away_id, home_id in matchups:
-            cur.execute(WNBA_REVENGE_GAME_QUERY, (away_id, home_id, home_id, away_id))
-            rows = cur.fetchall()
-            results.extend(rows)
- 
-    return results
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            results = []
+            for away_id, home_id in matchups:
+                cur.execute(WNBA_REVENGE_GAME_QUERY, (away_id, home_id, home_id, away_id))
+                rows = cur.fetchall()
+                results.extend(rows)
+            return results
 
 def check_first_revenge_game(player_id: int, team_id: int) -> bool:
     """Checks if a player's first revenge game against a team is recorded."""

@@ -60,6 +60,20 @@ export interface NFLRevengePlayer {
   venge_score: number;
 }
 
+export interface WNBARevengePlayer {
+  player_id: number;
+  name: string;
+  espn_athlete_id: string | null;
+  current_team_name: string;
+  current_team_abbr: string;
+  former_team_name: string;
+  former_team_abbr: string;
+  venge_score: number;
+  departure_method: string | null;
+  games_for_former: number;
+  league: string;
+}
+
 export interface PlayerProfileData extends NBARevengePlayer {
   departure_date: string;
   departure_year: number;

@@ -314,6 +314,98 @@ def calculate_nfl_venge_score(
                     print(f"Performance boost: +{performance_score:.1f} points (revenge factor: {revenge_factor:.2f})")
     if usage_tier == 'BACKUP' and position == 'QB': score -= 2
 
-    final_score = max(2.0, min(score, 10.0)) 
-    
+    final_score = max(2.0, min(score, 10.0))
+
     return [round(final_score, 1), comparison]
+
+
+# 2026 WNBA All-Stars
+wnba_all_stars = {
+    "A'ja Wilson",
+    "Breanna Stewart",
+    "Napheesa Collier",
+    "Caitlin Clark",
+    "Sabrina Ionescu",
+    "Alyssa Thomas",
+    "Jonquel Jones",
+    "Kelsey Plum",
+    "Arike Ogunbowale",
+    "Aliyah Boston",
+    "Jewell Loyd",
+    "Jackie Young",
+    "Kahleah Copper",
+    "Chelsea Gray",
+    "Paige Bueckers",
+}
+
+# WNBA notable revenge narratives {player_name: {set of opponent internal team IDs}}
+wnba_notable_revenge_narratives = {
+    "Breanna Stewart": {13},       # SEA -- left for NY
+    "Jewell Loyd": {7},            # LV -- left SEA for LV
+    "Natasha Cloud": {15},         # WSH -- longtime Mystic
+    "Courtney Vandersloot": {2},   # CHI -- Chicago legend left for NY then returned
+    "Nneka Ogwumike": {8},         # LA -- Sparks icon
+    "Jonquel Jones": {3},          # CON -- CON franchise player left for NY
+    "Alyssa Thomas": {3},          # CON -- longtime Sun left for PHX
+    "Brionna Jones": {3},          # CON
+    "Skylar Diggins": {11, 13},    # PHX and SEA
+    "Dearica Hamby": {7},          # LV -- famously released while pregnant
+}
+
+
+def calculate_wnba_venge_score(
+    player_id: int,
+    player_name: str,
+    opponent_team_id: int,
+    games_played_for_former: int,
+    total_career_games: int,
+    is_prev_team: bool,
+    departure_method: str = None,
+) -> float:
+    """
+    Calculate VengeScore for a WNBA player facing a former team. Returns [score, None].
+
+    Factors:
+      Tenure ratio (games with former / career games): up to 3.0
+      Former team bonus (prev team before current):     1.5
+      All-Star status:                                  1.0
+      Notable revenge narrative:                        2.0
+      Departure method:                                 up to 1.0
+    """
+    score = 1.0
+
+    # 1. TENURE IMPACT (0-3 points)
+    if total_career_games > 0:
+        tenure_ratio = games_played_for_former / total_career_games
+        if tenure_ratio >= 0.4:
+            tenure_score = 2.5 + (tenure_ratio - 0.4) * 0.83
+        elif tenure_ratio >= 0.2:
+            tenure_score = 1.5 + (tenure_ratio - 0.2) * 5
+        elif tenure_ratio >= 0.1:
+            tenure_score = 0.75 + (tenure_ratio - 0.1) * 7.5
+        else:
+            tenure_score = tenure_ratio * 7.5
+        score += tenure_score
+
+    # 2. FORMER TEAM BONUS (1.5 points)
+    if is_prev_team:
+        score += 1.5
+
+    # 3. ALL-STAR STATUS (1 point)
+    if player_name in wnba_all_stars:
+        score += 1.0
+
+    # 4. NOTABLE REVENGE NARRATIVES (2 points)
+    if player_name in wnba_notable_revenge_narratives:
+        if opponent_team_id in wnba_notable_revenge_narratives[player_name]:
+            score += 2.0
+
+    # 5. DEPARTURE METHOD
+    if departure_method in ('Released', 'Waived', 'Traded'):
+        score += 1.0
+    elif departure_method == 'Free Agent':
+        score += 0.2
+    else:
+        score += 0.2
+
+    return [round(max(1.0, min(score, 10.0)), 1), None]

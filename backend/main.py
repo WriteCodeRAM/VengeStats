@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
 from schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
+from schedule.wnba_revenge_pipeline import get_wnba_revenge_matchups
 from db.venge_data import convert_numpy_to_python
 from nba_utils.utils.weekly_sync import run_db_sync
 
@@ -118,11 +119,32 @@ async def matchups():
         cleaned_player = convert_numpy_to_python(player)
         set_in_cache(f"nfl_player_{player['player_id']}", cleaned_player, 604800)
 
+    # generate WNBA matchups
+    wnba_revenge_games = get_wnba_revenge_matchups()
+    lightweight_wnba_games = []
+
+    for player in wnba_revenge_games:
+        lightweight_wnba_games.append({
+            "player_id": player["player_id"],
+            "name": player["name"],
+            "espn_athlete_id": player["espn_athlete_id"],
+            "current_team_name": player["current_team_abbr"],
+            "current_team_abbr": player["current_team_abbr"],
+            "former_team_name": player["former_team_name"],
+            "former_team_abbr": player["former_team_abbr"],
+            "venge_score": player["venge_score"],
+            "departure_method": player["departure_method"],
+            "games_for_former": player["games_for_former"],
+            "league": "wnba",
+        })
+        set_in_cache(f"wnba_player_{player['player_id']}", player, 604800)
+
     matchups_data = {
         "nba_revenge_matchups": lightweight_nba_games,
-        "nfl_revenge_matchups": lightweight_nfl_games
+        "nfl_revenge_matchups": lightweight_nfl_games,
+        "wnba_revenge_matchups": lightweight_wnba_games,
     }
-    
+
     # NBA data stays static until October 21st anyways
     set_in_cache("all_matchups", matchups_data, 604800)
     
@@ -141,7 +163,15 @@ async def get_nfl_player_profile(player_id: int):
     cached_player = get_from_cache(f"nfl_player_{player_id}")
     if cached_player:
         return cached_player
-        
+
+    raise HTTPException(status_code=404, detail="Player not found")
+
+@app.get("/wnba/player/{player_id}")
+async def get_wnba_player_profile(player_id: int):
+    cached_player = get_from_cache(f"wnba_player_{player_id}")
+    if cached_player:
+        return cached_player
+
     raise HTTPException(status_code=404, detail="Player not found")
 
 @app.post("/cache/clear/{cache_key}")

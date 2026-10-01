@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { HorizontalPlayerScroll } from "./HorizontalPlayerScroll";
-import { NBARevengePlayer, NFLRevengePlayer } from "@/types/player";
+import { NBARevengePlayer, NFLRevengePlayer, WNBARevengePlayer } from "@/types/player";
 
 export function RevengePlayersList() {
   const [nbaPlayers, setNBAPlayers] = useState<NBARevengePlayer[]>([]);
   const [nflPlayers, setNFLPlayers] = useState<NFLRevengePlayer[]>([]);
+  const [wnbaPlayers, setWNBAPlayers] = useState<WNBARevengePlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,18 +26,23 @@ export function RevengePlayersList() {
         const data = await response.json();
         const nbaPlayers = data.nba_revenge_matchups || [];
         const nflPlayers = data.nfl_revenge_matchups || [];
+        const wnbaPlayers = data.wnba_revenge_matchups || [];
+
         const sortedNBAPlayers = nbaPlayers.sort(
           (a: NBARevengePlayer, b: NBARevengePlayer) =>
             b.venge_score - a.venge_score,
         );
-
         const sortedNFLPlayers = nflPlayers.sort(
           (a: NFLRevengePlayer, b: NFLRevengePlayer) =>
             b.venge_score - a.venge_score,
         );
+        const sortedWNBAPlayers = wnbaPlayers.sort(
+          (a: WNBARevengePlayer, b: WNBARevengePlayer) => b.venge_score - a.venge_score,
+        );
 
         setNBAPlayers(sortedNBAPlayers);
         setNFLPlayers(sortedNFLPlayers);
+        setWNBAPlayers(sortedWNBAPlayers);
       } catch (err) {
         console.error("Failed to fetch players:", err);
         setError(
@@ -87,6 +93,16 @@ export function RevengePlayersList() {
             : "matchup"
         } in Week 4`}
         players={nflPlayers}
+      />
+      {/* WNBA Section */}
+      <HorizontalPlayerScroll
+        title="WNBA Revenge Games 🏀"
+        subtitle={`${wnbaPlayers.length} revenge ${
+          wnbaPlayers.length > 1 || wnbaPlayers.length == 0
+            ? "matchups"
+            : "matchup"
+        } in the 2026 Playoffs`}
+        players={wnbaPlayers}
       />
     </div>
   );

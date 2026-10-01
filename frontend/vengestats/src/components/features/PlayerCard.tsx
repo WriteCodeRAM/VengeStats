@@ -52,12 +52,12 @@ export function PlayerCard({ player }: PlayerCardProps) {
   const status = getPlayerStatus();
 
   const isNFL = player.league?.toLowerCase() === "nfl";
+  const isWNBA = player.league?.toLowerCase() === "wnba";
 
   const getTeamLogoUrl = (teamAbbr: string, useAbbr?: string) => {
-    if (isNFL) {
-      const abbr = (useAbbr || teamAbbr)?.toLowerCase();
-      return `https://a.espncdn.com/i/teamlogos/nfl/500/${abbr}.png`;
-    }
+    const abbr = (useAbbr || teamAbbr)?.toLowerCase();
+    if (isNFL) return `https://a.espncdn.com/i/teamlogos/nfl/500/${abbr}.png`;
+    if (isWNBA) return `https://a.espncdn.com/i/teamlogos/wnba/500/${abbr}.png`;
     return `/nba_logos/${teamAbbr}.png`;
   };
 

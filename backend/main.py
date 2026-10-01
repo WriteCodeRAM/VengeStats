@@ -225,7 +225,8 @@ async def cron_refresh(cache_key: str):
     return {
         "status": "success",
         "nba_count": len(result.get('nba_revenge_matchups', [])),
-        "nfl_count": len(result.get('nfl_revenge_matchups', []))
+        "nfl_count": len(result.get('nfl_revenge_matchups', [])),
+        "wnba_count": len(result.get('wnba_revenge_matchups', []))
     }
 
 @app.post("/cron/sync-rosters/{cache_key}")

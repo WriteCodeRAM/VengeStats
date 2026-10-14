@@ -1,0 +1,125 @@
+name: NFL Weekly Revenge Update
+
+on:
+  schedule:
+    - cron: '0 14 * * 1'   # Every Monday 10am ET (14:00 UTC)
+  workflow_dispatch:        # Manual trigger for testing
+
+jobs:
+  nfl-weekly-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run full NFL weekly update via Claude
+        uses: anthropics/claude-code-action@beta
+        with:
+          prompt: |
+            You are running the weekly NFL revenge game update for VengeStats.
+            Read CLAUDE.md first for full context on the codebase, tweet format rules, and data sources.
+
+            Complete these steps in order:
+
+            1. FETCH THIS WEEK'S NFL SCHEDULE
+               Call the ESPN scoreboard API:
+               https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard
+               Parse all games: get the week number, away team ESPN ID, home team ID, game times/days.
+               Map ESPN team IDs to our internal NFL team IDs using NFL_TEAM_ID_TO_ABBR in
+               backend/db/queries/nfl/teams.py and TEAM_ID_TO_ESPN_ID patterns from the codebase.
+
+            2. UPDATE THE PIPELINE FILE
+               Edit backend/schedule/nfl_revenge_pipeline.py:
+               - Replace the matchups array with this week's full slate (format: ["away_id", "home_id"])
+               - Update the comment block with correct week number, dates, and bye teams
+               Edit frontend/vengestats/src/components/features/RevengePlayersList.tsx:
+               - Update the "Week N" subtitle to the correct current week number
+
+            3. IDENTIFY REVENGE PLAYERS
+               Run the pipeline to see who surfaces:
+               cd backend && python -c "
+               from schedule.nfl_revenge_pipeline import get_weekly_revenge_matchups
+               players = get_weekly_revenge_matchups()
+               for p in sorted(players, key=lambda x: x.get('revenge_score',0), reverse=True):
+                   print(p.get('display_name') or p.get('name'), '|', p.get('former_team_name'), '|', p.get('departure_method'), '|', p.get('revenge_score',0))
+               "
+
+            4. AUDIT CAREER HISTORIES
+               For each revenge player, using the DATABASE_URL env var:
+               a. Check if nfl_players.current_team_id matches the team with is_current_stint=TRUE
+                  in nfl_player_stints.
+               b. If they don't match: set the old is_current_stint to FALSE, add departure_method
+                  to that former-team stint, and INSERT a new current stint for the real current team
+                  with season_start=2026, is_current_stint=TRUE.
+               c. For any revenge player whose former-team stint has departure_method = NULL:
+                  research the real departure story (were they traded, released, or left as a free agent?)
+                  and set the correct value: 'Traded', 'Released', or 'Free Agent'.
+
+            5. SYNC TO RAILWAY PRODUCTION DB
+               Using RAILWAY_URL env var, push all updated/inserted stints for the affected players
+               via UPSERT (ON CONFLICT player_id, team_id, season_start DO UPDATE).
+
+            6. COMMIT AND PUSH
+               Commit the updated pipeline file and frontend subtitle change:
+               Message: "feat: update NFL matchups to Week N (Mon DD - Sun DD, 2026)"
+               Push to main.
+
+            7. REFRESH PRODUCTION CACHE
+               POST https://vengestats-production.up.railway.app/cron/refresh-cache/$CACHE_KEY
+
+            8. DRAFT THE TWEET
+               Write the weekly revenge tweet following VengeStats format exactly:
+               - Top 2 players by VengeScore only (skip if score under ~6.5 unless narrative is strong)
+               - Departure format: [F/A] for Free Agent, [Traded], [Released]
+               - Team nicknames ONLY, never city names ("Steelers" not "Pittsburgh Steelers")
+               - One punchy tagline focused on the top player, no em dashes
+               - Use #TNF on Thursday, #MNF on Monday, #NFLSunday otherwise
+               Save the complete tweet text to /tmp/nfl_week_tweet.txt
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+        env:
+          DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          RAILWAY_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          CACHE_KEY: ${{ secrets.CACHE_KEY }}
+
+      - name: Post tweet draft to job summary
+        if: always()
+        run: |
+          echo "## Tweet Draft" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f /tmp/nfl_week_tweet.txt ]; then
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/nfl_week_tweet.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "_Tweet file not generated — check Claude step logs._" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Send summary email
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "VengeStats: Week N NFL matchups updated ${{ job.status }}"
+          to: ${{ secrets.EMAIL_USERNAME }}
+          from: ${{ secrets.EMAIL_USERNAME }}
+          body: |
+            NFL weekly update finished with status: ${{ job.status }}
+
+            Check the Actions run for the tweet draft and full log:
+            https://github.com/${{ github.repository }}/actions

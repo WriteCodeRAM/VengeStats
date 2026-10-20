@@ -246,10 +246,10 @@ API base: `http://localhost:8000` (set via `NEXT_PUBLIC_API_URL` env var for pro
 Post the top 2 players by VengeScore only. Skip players with mid scores (under ~6.5) unless the narrative is strong.
 
 ```
-WEEK {N} NFL REVENGE GAMES 🏈
+TOP NFL REVENGE GAMES WEEK {N} 🏈
 
-🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}] — VengeScore: {X.X}
-🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}] — VengeScore: {X.X}
+🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}]
+🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}]
 
 {One punchy line about the top player's narrative. Make it personal.}
 
@@ -264,4 +264,4 @@ WEEK {N} NFL REVENGE GAMES 🏈
 - `#MNF` for Monday Night Football
 
 ### NBA Nightly Revenge Tweet
-Same format, swap NFL emoji for 🏀 and hashtags for `#NBA`.
+Same format: `TOP NBA REVENGE GAMES WEEK {N} 🏀`, swap hashtags for `#NBA`.

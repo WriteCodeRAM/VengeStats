@@ -8,6 +8,7 @@ on:
 jobs:
   nfl-weekly-update:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: write
 
@@ -26,14 +27,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run full NFL weekly update via Claude
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
-          mode: agent
-          model: claude-sonnet-5-5
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          allowed_tools: "Bash,Read,Edit,Write,Glob,Grep,WebSearch,WebFetch"
-          timeout_minutes: "45"
-          direct_prompt: |
+          claude_args: |
+            --model claude-sonnet-5-5
+            --allowedTools Bash,Read,Edit,Write,Glob,Grep,WebSearch,WebFetch
+          prompt: |
             You are running the weekly NFL revenge game update for VengeStats.
             Read CLAUDE.md first for full context on the codebase, tweet format rules, and data sources.
 

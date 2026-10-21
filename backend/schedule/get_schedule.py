@@ -1,6 +1,7 @@
 from typing import List, Tuple
 import requests
 import datetime
+from zoneinfo import ZoneInfo
 from db.queries.nba.teams import teams
 
 ESPN_NBA_SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard"
@@ -17,8 +18,10 @@ ESPN_TEAM_ID_TO_INTERNAL = {
 
 def get_nba_schedule() -> List[List[int]]:
     """Return today's NBA matchups as [[away_internal_id, home_internal_id], ...]."""
+    # Pin to today's ET date; ESPN's default scoreboard can still show last night's games after midnight
+    today_et = datetime.datetime.now(ZoneInfo("America/New_York")).strftime("%Y%m%d")
     try:
-        resp = requests.get(ESPN_NBA_SCOREBOARD, timeout=10)
+        resp = requests.get(ESPN_NBA_SCOREBOARD, params={"dates": today_et}, timeout=10)
         resp.raise_for_status()
         data = resp.json()
     except Exception as e:

@@ -8,6 +8,7 @@ on:
 jobs:
   nba-daily-update:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
 
@@ -26,14 +27,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run full NBA daily update via Claude
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
-          mode: agent
-          model: claude-sonnet-5-5
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          allowed_tools: "Bash,Read,Edit,Write,Glob,Grep,WebSearch,WebFetch"
-          timeout_minutes: "30"
-          direct_prompt: |
+          claude_args: |
+            --model claude-sonnet-5-5
+            --allowedTools Bash,Read,Edit,Write,Glob,Grep,WebSearch,WebFetch
+          prompt: |
             You are running the daily NBA revenge game update for VengeStats.
             Read CLAUDE.md first for full context on the codebase, tweet format rules, and data sources.
 

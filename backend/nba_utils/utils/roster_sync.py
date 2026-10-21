@@ -1,9 +1,9 @@
 from typing import Set, Tuple, List, Optional
 import time
 import requests
-from nba_utils.utils.player_utils import TEAM_ID_TO_ESPN_ID, ESPN_ROSTER_URL
+from nba_utils.utils.player_utils import TEAM_ID_TO_ESPN_ID, ESPN_ROSTER_URL, _norm
 from db.queries.nba.players import (
-    find_player_by_name_globally,
+    find_player_by_name_normalized,
     move_player_to_team,
     move_player_to_free_agency,
     insert_new_player,
@@ -73,12 +73,14 @@ def get_db_roster_set(team_id: int) -> Set[Tuple[int, str, str]]:
 
 def find_player_in_set(first_name: str, last_name: str, roster_set: Set[Tuple[int, str, str]]) -> Optional[Tuple[int, str, str]]:
     """Find player in roster set by name with collision detection"""
-    first_clean = first_name.strip()
-    last_clean = last_name.strip()
-    
+    # ESPN strips diacritics ('Doncic') while the DB may keep them ('Dončić')
+    first_clean = _norm(first_name.strip())
+    last_clean = _norm(last_name.strip())
+
     matches = []
     for player_tuple in roster_set:
         _, db_first, db_last = player_tuple
+        db_first, db_last = _norm(db_first), _norm(db_last)
         if db_first == first_clean and db_last == last_clean:
             matches.append(player_tuple)
     
@@ -91,6 +93,7 @@ def find_player_in_set(first_name: str, last_name: str, roster_set: Set[Tuple[in
 
     for player_tuple in roster_set:
         _, db_first, db_last = player_tuple
+        db_first, db_last = _norm(db_first), _norm(db_last)
         if last_clean == db_last and (first_clean in db_first or db_first in first_clean):
             print(f"    Partial match: {first_clean} {last_clean} -> {db_first} {db_last}")
             return player_tuple
@@ -125,7 +128,7 @@ def handle_new_or_moved_player(api_player: dict, new_team_id: int):
     nba_api_player_id = api_player['player_id']
     
     # search entire db for this player
-    player_data = find_player_by_name_globally(first_name, last_name)
+    player_data = find_player_by_name_normalized(first_name, last_name)
     
     if player_data:
         player_id, old_team_id = player_data

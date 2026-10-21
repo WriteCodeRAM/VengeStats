@@ -168,16 +168,20 @@ def calculate_nba_venge_score(
     else: 
         print("error: need to recall nba_api")
     #7 DEPARTURE METHOD
-    if departure_method in ['RELEASED', 'WAIVED', 'TRADED', 'TRADE']: 
-        score += 1
-    elif departure_method == 'F/A': 
-        score += 0.5
-    else: 
-        score += 0.2
+    score += departure_points(departure_method)
     # ensure minimum score of 1 and cap at 10
     final_score = max(1.0, min(score, 10.0))
     # return score and differentials
     return [round(final_score, 1), convert_numpy_to_python(comparison)]
+
+def departure_points(departure_method) -> float:
+    # DB holds mixed spellings ('Traded', 'TRADED', 'TRADE', 'Free Agent', 'F/A')
+    m = (departure_method or '').strip().upper()
+    if m in ('RELEASED', 'WAIVED', 'TRADED', 'TRADE'):
+        return 1.0
+    if m in ('F/A', 'FA', 'FREE AGENT'):
+        return 0.5
+    return 0.2
 
 def calculate_nfl_venge_score(
     player_data: dict,
@@ -197,15 +201,7 @@ def calculate_nfl_venge_score(
     most_recent_departure = player_data['departure_year'] or 0
     departure_method = player_data['departure_method']
     
-    score = 0
-    if departure_method in ['RELEASED', 'WAIVED', 'TRADED', 'TRADE']: 
-        score += 1
-        print(f'{player_name} was {departure_method}. Adding 1 point')
-    elif departure_method == 'F/A': 
-        score += 0.5
-    else: 
-        print('No departure method adding .2 points')
-        score += 0.2
+    score = departure_points(departure_method)
     comparison = None
 
     # 1. TENURE IMPACT (0-3.5 points)

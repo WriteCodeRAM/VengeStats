@@ -4,9 +4,20 @@ import { useState, useEffect } from "react";
 import { HorizontalPlayerScroll } from "./HorizontalPlayerScroll";
 import { NBARevengePlayer, NFLRevengePlayer } from "@/types/player";
 
+// "2026-10-21" -> "Wednesday, October 21"; parsed as UTC so the viewer's timezone can't shift the day
+function formatSlateDate(isoDate: string) {
+  return new Date(`${isoDate}T12:00:00Z`).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function RevengePlayersList() {
   const [nbaPlayers, setNBAPlayers] = useState<NBARevengePlayer[]>([]);
   const [nflPlayers, setNFLPlayers] = useState<NFLRevengePlayer[]>([]);
+  const [nbaSlateDate, setNBASlateDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +47,7 @@ export function RevengePlayersList() {
         );
 
         setNBAPlayers(sortedNBAPlayers);
+        setNBASlateDate(data.nba_slate_date ?? null);
         setNFLPlayers(sortedNFLPlayers);
       } catch (err) {
         console.error("Failed to fetch players:", err);
@@ -75,7 +87,7 @@ export function RevengePlayersList() {
           nbaPlayers.length > 1 || nbaPlayers.length == 0
             ? "matchups"
             : "matchup"
-        } on Opening Night`}
+        }${nbaSlateDate ? ` on ${formatSlateDate(nbaSlateDate)}` : " tonight"}`}
         players={nbaPlayers}
       />
       {/* NFL Section */}

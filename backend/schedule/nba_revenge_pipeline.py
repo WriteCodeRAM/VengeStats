@@ -81,6 +81,7 @@ def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
             'venge_score': revenge_score,
             'departure_date': player[6],
             'departure_year': departure_year,
+            'departure_method': player[7],
             'total_games': total_games_played_for_opp,
             'wins': wins,
             'losses': losses,

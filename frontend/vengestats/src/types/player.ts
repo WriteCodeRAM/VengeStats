@@ -38,6 +38,7 @@ export interface NBARevengePlayer {
   record: string;
   total_revenge_games: number;
   league: string;
+  departure_method?: string | null;
 }
 
 export interface NFLRevengePlayer {
@@ -58,6 +59,7 @@ export interface NFLRevengePlayer {
   departure_year: number;
   total_games_played_for_team: number;
   venge_score: number;
+  departure_method?: string | null;
 }
 
 export interface PlayerProfileData extends NBARevengePlayer {

@@ -3,6 +3,8 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import redis
 import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
@@ -88,7 +90,8 @@ async def matchups():
             "venge_score": player["venge_score"],
             "injury_status": player["injury_status"],
             "record": player["record"],
-            "total_revenge_games": player["total_revenge_games"], 
+            "total_revenge_games": player["total_revenge_games"],
+            "departure_method": player.get("departure_method"),
             "league": "nba"
         })
         # Cache NBA player profiles until October 21 
@@ -111,7 +114,8 @@ async def matchups():
             "former_team_name": player["former_team_name"],
             "games_played": player["total_games_played_for_team"], 
             "total_revenge_games": player["total_revenge_games"],
-            "venge_score": player["revenge_score"], 
+            "venge_score": player["revenge_score"],
+            "departure_method": player.get("departure_method"),
             "league": "nfl"
         })
         # Cache NFL player profiles for 1 week (604800 seconds)
@@ -119,6 +123,7 @@ async def matchups():
         set_in_cache(f"nfl_player_{player['player_id']}", cleaned_player, 604800)
 
     matchups_data = {
+        "nba_slate_date": datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d"),
         "nba_revenge_matchups": lightweight_nba_games,
         "nfl_revenge_matchups": lightweight_nfl_games
     }

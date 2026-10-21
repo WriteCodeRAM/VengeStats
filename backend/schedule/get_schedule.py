@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 import requests
 import datetime
 from zoneinfo import ZoneInfo
@@ -16,12 +16,12 @@ ESPN_TEAM_ID_TO_INTERNAL = {
     "23": 26, "24": 27, "28": 28, "26": 29, "27": 30,
 }
 
-def get_nba_schedule() -> List[List[int]]:
-    """Return today's NBA matchups as [[away_internal_id, home_internal_id], ...]."""
+def get_nba_schedule(date: Optional[str] = None) -> List[List[int]]:
+    """Return NBA matchups for date (YYYYMMDD, default today ET) as [[away_internal_id, home_internal_id], ...]."""
     # Pin to today's ET date; ESPN's default scoreboard can still show last night's games after midnight
-    today_et = datetime.datetime.now(ZoneInfo("America/New_York")).strftime("%Y%m%d")
+    date = date or datetime.datetime.now(ZoneInfo("America/New_York")).strftime("%Y%m%d")
     try:
-        resp = requests.get(ESPN_NBA_SCOREBOARD, params={"dates": today_et}, timeout=10)
+        resp = requests.get(ESPN_NBA_SCOREBOARD, params={"dates": date}, timeout=10)
         resp.raise_for_status()
         data = resp.json()
     except Exception as e:

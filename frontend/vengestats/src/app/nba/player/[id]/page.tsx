@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { PlayerProfileData } from "@/types/player";
+import { DepartureBadge } from "@/components/features/DepartureBadge";
 
 export default function PlayerProfilePage({
   params,
@@ -345,12 +346,15 @@ export default function PlayerProfilePage({
               <span>{status.text}</span>
             </div>
 
-            <div className="text-text-secondary text-sm">
-              {player.total_revenge_games > 0
-                ? `${player.total_revenge_games + 1}${getOrdinalSuffix(
-                    player.total_revenge_games + 1,
-                  )} revenge game against ${player.former_team_name}`
-                : `First revenge game against ${player.former_team_name}`}
+            <div className="text-text-secondary text-sm flex items-center justify-center gap-2">
+              <span>
+                {player.total_revenge_games > 0
+                  ? `${player.total_revenge_games + 1}${getOrdinalSuffix(
+                      player.total_revenge_games + 1,
+                    )} revenge game against ${player.former_team_name}`
+                  : `First revenge game against ${player.former_team_name}`}
+              </span>
+              <DepartureBadge method={player.departure_method} />
             </div>
           </div>
         </div>

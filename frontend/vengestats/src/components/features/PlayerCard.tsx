@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DepartureBadge } from "./DepartureBadge";
 
 interface PlayerCardProps {
   player: {
@@ -19,6 +20,7 @@ interface PlayerCardProps {
     current_team_name: string;
     current_team_abbr?: string;
     league: string;
+    departure_method?: string | null;
   };
 }
 
@@ -90,10 +92,11 @@ export function PlayerCard({ player }: PlayerCardProps) {
           </div>
 
           {/* Player name */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center gap-1.5">
             <div className="text-white font-semibold text-sm truncate">
               {player.name}
             </div>
+            <DepartureBadge method={player.departure_method} />
           </div>
 
           {/* Venge score */}
@@ -149,7 +152,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
 
         {/* player info */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 shrink-0 bg-gray-600 rounded-full flex items-center justify-center">
             <span className="text-white font-semibold text-sm">
               {player.name
                 .split(" ")
@@ -157,8 +160,11 @@ export function PlayerCard({ player }: PlayerCardProps) {
                 .join("")}
             </span>
           </div>
-          <div className="flex-1">
-            <div className="text-white font-semibold">{player.name}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <div className="text-white font-semibold truncate">{player.name}</div>
+              <DepartureBadge method={player.departure_method} />
+            </div>
             <div className="text-text-secondary text-xs">
               Former {player.former_team_name} player
             </div>

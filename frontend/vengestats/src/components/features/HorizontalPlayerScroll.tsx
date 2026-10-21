@@ -62,6 +62,7 @@ export function HorizontalPlayerScroll({
                   current_team_name: player.current_team_name,
                   current_team_abbr: player.current_team_abbr,
                   league: player.league,
+                  departure_method: player.departure_method,
                 }}
               />
             </div>

@@ -1,0 +1,102 @@
+name: NBA Daily Revenge Update
+
+on:
+  schedule:
+    - cron: '0 5 * * *'    # Every day 1am ET (05:00 UTC) — before morning shows
+  workflow_dispatch:        # Manual trigger for testing
+
+jobs:
+  nba-daily-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run full NBA daily update via Claude
+        uses: anthropics/claude-code-action@beta
+        with:
+          prompt: |
+            You are running the daily NBA revenge game update for VengeStats.
+            Read CLAUDE.md first for full context on the codebase, tweet format rules, and data sources.
+
+            Complete these steps in order:
+
+            1. RUN THE PIPELINE
+               cd backend && python -c "
+               from schedule.nba_revenge_pipeline import get_daily_revenge_matchups
+               players = get_daily_revenge_matchups()
+               for p in sorted(players, key=lambda x: x.get('venge_score',0), reverse=True):
+                   print(p.get('name'), '|',
+                         p.get('former_team_name'), '|',
+                         p.get('departure_method'), '|',
+                         p.get('venge_score',0))
+               "
+               The pipeline fetches today's NBA schedule from ESPN automatically via
+               backend/schedule/get_schedule.py. If there are no NBA games today, it will
+               return an empty or very short list — in that case still run the audit (step 2)
+               and skip straight to step 4 (no tweet today).
+
+            2. AUDIT CAREER HISTORIES
+               For each revenge player surfaced, using DATABASE_URL env var:
+
+               a. Check nba_players.prev_team_id matches the most recent NON-current stint's
+                  team_id in nba_player_team_stints_api. If they differ, update prev_team_id.
+                  The stints table is the source of truth (CLAUDE.md).
+
+               b. Check that the stint with is_current=TRUE has the same team_id as
+                  nba_players.current_team_id (both use internal IDs 1-30, integers).
+                  If they don't match: set old is_current=FALSE, insert a new current stint with
+                  first_game_date = today and is_current=TRUE.
+
+               c. For any revenge player with departure_method = NULL on their former-team stint:
+                  research the real story and set 'Traded', 'Released', or 'Free Agent'.
+
+            3. SYNC TO RAILWAY PRODUCTION DB
+               Using RAILWAY_URL env var, push all updated stints and player records via UPSERT:
+               - nba_player_team_stints_api: ON CONFLICT (player_id, team_id, first_game_date) DO UPDATE
+               - nba_players: ON CONFLICT (id) DO UPDATE SET prev_team_id=EXCLUDED.prev_team_id,
+                 current_team_id=EXCLUDED.current_team_id
+
+            4. REFRESH PRODUCTION CACHE
+               POST https://vengestats-production.up.railway.app/cron/refresh-cache/$CACHE_KEY
+
+            5. DRAFT THE TWEET (only if revenge players exist with VengeScore >= 6.0)
+               Write the daily revenge tweet following VengeStats format exactly:
+               - Header: "TOP NBA REVENGE GAMES [Weekday] 🏀"
+               - Top 2 players by VengeScore only
+               - Departure format: [F/A] for Free Agent, [Traded], [Released]
+               - Team nicknames ONLY, never city names ("Lakers" not "Los Angeles Lakers")
+               - One punchy tagline focused on the top player, no em dashes
+               Save the complete tweet text to /tmp/nba_day_tweet.txt
+               If no games or no players worth tweeting, write "NO TWEET TODAY" to the file.
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+        env:
+          DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          RAILWAY_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          CACHE_KEY: ${{ secrets.CACHE_KEY }}
+
+      - name: Post tweet draft to job summary
+        if: always()
+        run: |
+          echo "## NBA Tweet Draft" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f /tmp/nba_day_tweet.txt ]; then
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/nba_day_tweet.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "_Tweet file not generated — check Claude step logs._" >> $GITHUB_STEP_SUMMARY
+          fi

@@ -10,14 +10,16 @@ from typing import List
 from schemas.revenge_types import EnrichedNBARevengePlayer
 
 def get_daily_revenge_matchups() -> List[EnrichedNBARevengePlayer]:
-    # NBA 2026-27 Opening Night, Oct 20, 2026 (NBC tripleheader)
-    # NYK hosts PHI as defending champions (Knicks won 2025-26 title)
-    # Format: [away_team_id, home_team_id] using internal team IDs
-    matchups = [
-        [2, 9],   # BOS @ DET  (3 PM ET)
-        [23, 20], # PHI @ NYK  (7 PM ET, LeBron in NYC, banner night)
-        [21, 27], # OKC @ SAS  (9:30 PM ET)
-    ]
+    # Fetch today's NBA games live from ESPN.
+    # Falls back to Opening Night if the fetch returns nothing (e.g. rest days early in season).
+    matchups = get_nba_schedule()
+    if not matchups:
+        # NBA 2026-27 Opening Night fallback — hardcoded for rest days / early season
+        matchups = [
+            [2, 9],   # BOS @ DET
+            [23, 20], # PHI @ NYK
+            [21, 27], # OKC @ SAS
+        ]
 
     revenge_games = get_nba_revenge_games(matchups)
     updated_games = get_nba_injuries(revenge_games)

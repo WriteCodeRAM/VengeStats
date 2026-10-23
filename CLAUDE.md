@@ -257,6 +257,7 @@ TOP NFL REVENGE GAMES WEEK {N} 🏈
 ```
 
 **Rules:**
+- Never tweet a player listed as `Out` on the injury report. Check the live ESPN injury report (`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries` for NBA, the NFL equivalent for NFL) right before posting, not just the cached `/matchups` data, since statuses change during the day. If a pick is Out, replace them with the next-best player.
 - Departure method must be verified in DB before posting (see Departure Methods section)
 - VengeScore stands alone per player, never combined or shown as a ratio
 - One narrative line max, focused on the top player

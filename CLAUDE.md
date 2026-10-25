@@ -259,7 +259,7 @@ TOP NFL REVENGE GAMES WEEK {N} 🏈
 **Rules:**
 - Never tweet a player listed as `Out` or `Injured Reserve` on the injury report. Check the live ESPN injury report (`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries` for NBA, the NFL equivalent for NFL) right before posting, not just the cached `/matchups` data, since statuses change during the day. If a pick is Out, replace them with the next-best player.
 - Departure method must be verified in DB before posting (see Departure Methods section)
-- Use team nicknames, never cities ("Colts", not "Indianapolis"). Where fans use a common short form, use it: "Cavs", "Sixers", "Mavs", "Wolves", "Blazers", "Pels", "Niners", "Pats", "Bucs".
+- Use team nicknames, never cities ("Colts", not "Indianapolis"). Where fans use a common short form, use it: "Cavs", "76ers" (not "Sixers"), "OKC" (not "Thunder"; the one city-style exception), "Mavs", "Wolves", "Blazers", "Pels", "Niners", "Pats", "Bucs".
 - In tweet copy, write the `Free Agent` departure method as `[F/A]`. This is display only; the DB value stays `Free Agent`.
 - VengeScore stands alone per player, never combined or shown as a ratio
 - One narrative line max, focused on the top player

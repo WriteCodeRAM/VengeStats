@@ -80,7 +80,7 @@ jobs:
                /tmp/nba_report.md: tonight's slate, every DB change you made (player, what changed,
                source), anything you could not verify, and the final revenge list with VengeScores.
                /tmp/nba_day_tweet.txt: the tweet per CLAUDE.md "NBA Nightly Revenge Tweet"
-               (top 2 by VengeScore, only if the top score is at least 6.0; [F/A], [Traded], [Released];
+               (up to 3 quality players by VengeScore, 2 if there aren't 3 good ones; starters/rotation players over fringe bench per the depth chart, never force in someone who won't play; only if the top score is at least 6.0; [F/A], [Traded], [Released];
                team nicknames only; one tagline; no em dashes). Otherwise write "NO TWEET TODAY".
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
         env:

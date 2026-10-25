@@ -87,7 +87,9 @@ jobs:
 
             8. DRAFT THE TWEET
                Write the weekly revenge tweet following VengeStats format exactly:
-               - Top 2 players by VengeScore only (skip if score under ~6.5 unless narrative is strong)
+               - Up to 3 quality players by VengeScore, 2 if there aren't 3 good ones; check the ESPN depth
+                 chart and pick starters. Never force in a backup who won't play (a backup QB barely plays).
+                 Never include anyone Out or on IR.
                - Departure format: [F/A] for Free Agent, [Traded], [Released]
                - Team nicknames ONLY, never city names ("Steelers" not "Pittsburgh Steelers")
                - One punchy tagline focused on the top player, no em dashes

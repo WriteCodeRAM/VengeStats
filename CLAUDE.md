@@ -243,11 +243,11 @@ API base: `http://localhost:8000` (set via `NEXT_PUBLIC_API_URL` env var for pro
 ## Tweet Format
 
 ### NFL Weekly Revenge Tweet
-Post the top 2 players by VengeScore only. Skip players with mid scores (under ~6.5) unless the narrative is strong.
-
+Post **up to 3 quality players**, ordered by VengeScore. It's on a supply basis: use 3 when the slate has 3 good ones, otherwise post 2. Never force a backup in just to reach 3, especially one who won't play. Prioritize players who will actually play: starters over backups. Check the ESPN depth chart (`https://site.api.espn.com/apis/site/v2/sports/{football/nfl|basketball/nba}/teams/{espn_id}/depthcharts`). In the NFL, a backup QB or a deep-depth RB/WR barely plays, so skip them for a lower-scoring starter. In the NBA, a rotation player who plays real minutes off the bench is fine, but a starter beats a fringe bench player.
 ```
 TOP NFL REVENGE GAMES WEEK {N} 🏈
 
+🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}]
 🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}]
 🔥 {Player Name} ({Current Team}) vs {Former Team} [{Departure Method}]
 
@@ -257,7 +257,7 @@ TOP NFL REVENGE GAMES WEEK {N} 🏈
 ```
 
 **Rules:**
-- Never tweet a player listed as `Out` on the injury report. Check the live ESPN injury report (`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries` for NBA, the NFL equivalent for NFL) right before posting, not just the cached `/matchups` data, since statuses change during the day. If a pick is Out, replace them with the next-best player.
+- Never tweet a player listed as `Out` or `Injured Reserve` on the injury report. Check the live ESPN injury report (`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries` for NBA, the NFL equivalent for NFL) right before posting, not just the cached `/matchups` data, since statuses change during the day. If a pick is Out, replace them with the next-best player.
 - Departure method must be verified in DB before posting (see Departure Methods section)
 - Use team nicknames, never cities ("Colts", not "Indianapolis"). Where fans use a common short form, use it: "Cavs", "Sixers", "Mavs", "Wolves", "Blazers", "Pels", "Niners", "Pats", "Bucs".
 - In tweet copy, write the `Free Agent` departure method as `[F/A]`. This is display only; the DB value stays `Free Agent`.

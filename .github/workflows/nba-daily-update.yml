@@ -87,6 +87,22 @@ jobs:
           DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
           CACHE_KEY: ${{ secrets.CACHE_KEY }}
 
+      - name: Refresh and verify production cache
+        if: always()
+        env:
+          CACHE_KEY: ${{ secrets.CACHE_KEY }}
+        run: |
+          API=https://vengestats-production.up.railway.app
+          TODAY=$(TZ=America/New_York date +%F)
+          slate() { curl -s --max-time 600 "$API/matchups" | python3 -c "import json,sys; print(json.load(sys.stdin).get('nba_slate_date'))"; }
+          if [ "$(slate)" != "$TODAY" ]; then
+            curl -s --fail --max-time 600 -X POST "$API/cron/refresh-cache/$CACHE_KEY"
+            echo
+          fi
+          SLATE=$(slate)
+          echo "nba_slate_date=$SLATE, expected $TODAY"
+          [ "$SLATE" = "$TODAY" ] || { echo "::error::Production cache is not on today's slate"; exit 1; }
+
       - name: Post tweet draft to job summary
         if: always()
         run: |

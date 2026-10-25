@@ -69,10 +69,12 @@ def set_in_cache(key, data, expiry=3600):
 @app.get("/matchups")
 async def matchups():
     cached_matchups = get_from_cache("all_matchups")
-    if cached_matchups:
+    today_et = datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
+    # NBA slate changes daily, so a cache from a previous ET day is stale even if the nightly refresh missed
+    if cached_matchups and cached_matchups.get("nba_slate_date") == today_et:
         print("Returning cached matchups")
         return cached_matchups
-    
+
     print("Generating fresh matchups...")
     
     # generate NBA matchups
@@ -123,12 +125,12 @@ async def matchups():
         set_in_cache(f"nfl_player_{player['player_id']}", cleaned_player, 604800)
 
     matchups_data = {
-        "nba_slate_date": datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d"),
+        "nba_slate_date": today_et,
         "nba_revenge_matchups": lightweight_nba_games,
         "nfl_revenge_matchups": lightweight_nfl_games
     }
     
-    # NBA data stays static until October 21st anyways
+    # 7-day TTL is a backstop; the slate date check above forces a daily rebuild
     set_in_cache("all_matchups", matchups_data, 604800)
     
     return matchups_data

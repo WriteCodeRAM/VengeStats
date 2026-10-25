@@ -168,7 +168,7 @@ During offseason, matchups are **hardcoded** in the pipeline files to showcase t
 
 ### Update cadence (in-season)
 - **NFL**: Update matchups every **Tuesday** for the upcoming week's slate. Hardcode all 16 games in `nfl_revenge_pipeline.py`, commit, push, then hit `POST /cron/refresh-cache/{CACHE_KEY}` to regenerate.
-- **NBA**: Update matchups every **night at midnight**. During the season the matchups should reflect that day's games. Hit the cache refresh endpoint nightly.
+- **NBA**: Update matchups every **night at midnight**. During the season the matchups should reflect that day's games. This is automatic: `.github/workflows/nba-daily-update.yml` runs nightly, refreshes the cache, and fails the run if `/matchups` isn't on today's ET slate. `/matchups` also rebuilds itself whenever the cached `nba_slate_date` isn't today's ET date.
 - **Cache refresh endpoint**: `POST https://vengestats-production.up.railway.app/cron/refresh-cache/{CACHE_KEY}` (key is in Railway env vars)
 
 ---
@@ -259,10 +259,12 @@ TOP NFL REVENGE GAMES WEEK {N} 🏈
 **Rules:**
 - Never tweet a player listed as `Out` on the injury report. Check the live ESPN injury report (`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries` for NBA, the NFL equivalent for NFL) right before posting, not just the cached `/matchups` data, since statuses change during the day. If a pick is Out, replace them with the next-best player.
 - Departure method must be verified in DB before posting (see Departure Methods section)
+- Use team nicknames, never cities ("Colts", not "Indianapolis"). Where fans use a common short form, use it: "Cavs", "Sixers", "Mavs", "Wolves", "Blazers", "Pels", "Niners", "Pats", "Bucs".
+- In tweet copy, write the `Free Agent` departure method as `[F/A]`. This is display only; the DB value stays `Free Agent`.
 - VengeScore stands alone per player, never combined or shown as a ratio
 - One narrative line max, focused on the top player
 - Use `#TNF` instead of `#NFLSunday` for Thursday Night Football games
 - `#MNF` for Monday Night Football
 
 ### NBA Nightly Revenge Tweet
-Same format: `TOP NBA REVENGE GAMES WEEK {N} 🏀`, swap hashtags for `#NBA`.
+NBA tweets are **daily**, never weekly, so the header uses the slate date instead of a week number: `TOP NBA REVENGE GAMES {MON} {D} 🏀` (e.g. `TOP NBA REVENGE GAMES OCT 23 🏀`). Otherwise same format as NFL; swap hashtags for `#NBA`.

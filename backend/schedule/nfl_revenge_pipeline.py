@@ -5,28 +5,29 @@ from nfl_api.utils.player_stats import get_all_nfl_player_data
 
 def get_weekly_revenge_matchups(): 
 
-    # NFL 2026 Week 8: Full slate
+    # NFL 2026 Week 9: Full slate
     # Format: [away_team_id, home_team_id]  (IDs match ESPN/NFL Data Py)
-    # NO (18), NYG (19), SF (25), HOU (34) on bye
+    # TEN (10), PIT (23) on bye
     matchups = [
-        # Thursday Oct 29
-        ["29",  "9"],  # CAR @ GB  (Thursday Night Football)
-        # Sunday Nov 1
-        ["33",  "2"],  # BAL @ BUF
-        ["10",  "4"],  # TEN @ CIN
-        ["22",  "6"],  # ARI @ DAL
-        ["16",  "8"],  # MIN @ DET
-        ["13", "20"],  # LV  @ NYJ
-        [ "5", "23"],  # CLE @ PIT
-        [ "1", "27"],  # ATL @ TB
-        ["11", "30"],  # IND @ JAX
-        ["24", "14"],  # LAC @ LAR
-        ["12",  "7"],  # KC  @ DEN
-        ["17", "15"],  # NE  @ MIA
-        # Sunday Night Nov 1
-        ["21", "28"],  # PHI @ WSH  (Sunday Night Football)
-        # Monday Nov 2
-        [ "3", "26"],  # CHI @ SEA  (Monday Night Football)
+        # Thursday Nov 5
+        ["30", "33"],  # JAX @ BAL  (Thursday Night Football)
+        # Sunday Nov 8
+        [ "4",  "1"],  # CIN @ ATL
+        [ "6", "11"],  # DAL @ IND
+        ["20", "12"],  # NYJ @ KC
+        [ "8", "15"],  # DET @ MIA
+        [ "5", "18"],  # CLE @ NO
+        ["19", "21"],  # NYG @ PHI
+        ["14", "28"],  # LAR @ WSH
+        [ "7", "29"],  # DEN @ CAR
+        ["34", "24"],  # HOU @ LAC
+        [ "9", "17"],  # GB  @ NE
+        ["13", "25"],  # LV  @ SF
+        ["22", "26"],  # ARI @ SEA
+        # Sunday Night Nov 8
+        ["27",  "3"],  # TB  @ CHI  (Sunday Night Football)
+        # Monday Nov 9
+        [ "2", "16"],  # BUF @ MIN  (Monday Night Football)
     ]
 
     revenge_players = get_nfl_revenge_games(matchups)

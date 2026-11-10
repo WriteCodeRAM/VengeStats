@@ -52,7 +52,8 @@ notable_revenge_narratives = {
     "Russell Westbrook": {21, 14},      # OKC, LAL
     "Jrue Holiday": {17},               # MIL
     "Marcus Smart": {2},                # BOS
-    "Luka Dončić": {7}                  # DAL
+    "Luka Dončić": {7},                 # DAL
+    "Jaylen Brown": {2}                 # BOS
 }
 
 def convert_numpy_to_python(obj):

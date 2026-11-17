@@ -2,7 +2,7 @@ name: NFL Weekly Revenge Update
 
 on:
   schedule:
-    - cron: '0 14 * * 1'   # Every Monday 10am ET (14:00 UTC)
+    - cron: '0 14 * * 2'   # Every Tuesday 9am ET (14:00 UTC), after Monday Night Football
   workflow_dispatch:        # Manual trigger for testing
 
 jobs:
